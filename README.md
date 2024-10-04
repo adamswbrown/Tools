@@ -43,6 +43,7 @@ Ensure the following are set up on your system:
         cd ~/Library/Application\ Support/Microsoft\ Edge
         # List out the profile directories. Note that the directory name is what is used in the launch command, *not* necessarily the friendly name of the profile you see in Microsoft Edge.app
         find ./ -type f -name Preferences
+    Update line 108 with your Altra/Lab3 profile name
 
 - CSV files are saved in the correct paths as specified in the script.
 
