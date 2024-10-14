@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    connect-src 'self' https://drmigratecode.blob.core.windows.net;
+  ">
+  <title>Azure Managed Applications</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <ul>
+      <li><a href="#" onclick="showSearchTab()">Search</a></li>
+      <li><a href="#" onclick="showAdminTab()">Admin</a></li>
+    </ul>
+  </div>
+
+  <!-- Content Area -->
+  <div id="content-area">
+
+    <!-- Search Tab -->
+    <div id="search-tab" style="display: block;">
+      <h1>Azure Managed Applications Viewer</h1>
+
+      <label for="tenant-select">Select Tenant:</label>
+      <select id="tenant-select">
+        <option value="95e3e402-49e1-4ad0-b73d-18c03e864448">Altra</option>
+        <option value="e65107ae-deaa-4f76-b79e-c4b5067a5929">Lab3</option>
+      </select>
+      
+      <div id="button-container">
+        <button id="login-button">Login to Azure Tenant</button>
+        <button id="logout-button" style="display: none;">Logout of Azure</button>
+        <button id="refresh-button" style="display: none;">Refresh</button>
+        <button id="cancel-button" style="display: none;">Cancel</button>
+      </div>
+
+      <div id="error-box" style="display: none;">
+        <h4>Please Note</h4>
+        <p id="error-message">No errors currently.</p>
+      </div>
+
+      <div id="search-container" style="display: none;">
+        <label for="search-input">Search:</label>
+        <input type="text" id="search-input" placeholder="Search applications...">
+      </div>
+
+      <div id="tenant-info" style="display: none;">
+        Logged in to tenant: <span id="tenant-name"></span> | Total Applications: <span id="total-applications-count"></span>
+      </div>
+
+      <div id="progress-container" style="display: none;">
+        <progress id="progress-bar" value="0" max="100"></progress>
+        <p id="progress-text">Retrieving data...</p>
+      </div>
+
+      <div id="loading-message" style="display: none;">Loading applications, please wait...</div>
+
+      <div id="table-container" style="display: none;"></div>
+
+      <div id="login-prompt"></div>
+    </div>
+
+    <!-- Admin Tab -->
+    <div id="admin-tab" style="display: none;">
+      <h1>Admin - Tenant Management</h1>
+    
+      <h3>Add New Tenant</h3>
+      <div class="tenant-input">
+        <label for="tenant-id-input">Tenant ID:</label>
+        <input type="text" id="tenant-id-input" placeholder="Enter Tenant ID">
+      </div>
+      <div class="tenant-input">
+        <label for="tenant-domain-input">Tenant Domain:</label>
+        <input type="text" id="tenant-domain-input" placeholder="Enter Tenant Domain">
+      </div>
+      <button id="add-tenant-button" class="btn btn-add" onclick="addTenant()">Add Tenant</button>
+    
+      <h3>Configured Tenants</h3>
+      <ul id="tenant-list">
+        <!-- Dynamically populated tenant list -->
+      </ul>
+    
+      <h3>Customer List URL</h3>
+      <div class="tenant-input">
+        <label for="customer-list-url">Customer List URL:</label>
+        <input type="text" id="customer-list-url" placeholder="Enter the URL for Customer List">
+      </div>
+      <button id="save-customer-list-url" class="btn btn-add" onclick="saveCustomerListUrl()">Save URL</button>
+    </div>
+    
+    <script src="renderer.js"></script>
+
+    <script>
+      function showSearchTab() {
+        document.getElementById('search-tab').style.display = 'block';
+        document.getElementById('admin-tab').style.display = 'none';
+      }
+
+      function showAdminTab() {
+        document.getElementById('search-tab').style.display = 'none';
+        document.getElementById('admin-tab').style.display = 'block';
+        loadTenantList();
+      }
+    </script>
+
+</body>
+</html>
