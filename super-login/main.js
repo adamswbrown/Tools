@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
+const { exec } = require('child_process');
+const fs = require('fs');
 
 let mainWindow;
 
@@ -8,8 +10,6 @@ function createMainWindow() {
     width: 1400,
     height: 900,
     webPreferences: {
-      // Comment out the preload script since it's missing
-      // preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false, // To allow integration with Electron APIs
     },
@@ -18,8 +18,56 @@ function createMainWindow() {
   mainWindow.loadFile('index.html');
 }
 
-// Wait for the app to be ready before creating windows
-app.on('ready', createMainWindow);
+// Ensure output directory exists
+function ensureOutputDirectory() {
+  const outputDir = path.join(__dirname, 'output');
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir); // Create the directory if it doesn't exist
+  }
+}
+
+// Handle Salesforce CLI query execution
+ipcMain.on('run-salesforce-query', (event) => {
+  const outputFilePath = path.join(__dirname, 'output', 'salesforce.csv');
+  ensureOutputDirectory(); // Ensure the output directory exists before writing
+
+  const queryCommand = `sfdx force:data:soql:query -o 'Altra' --query "SELECT Subscription_ID__c, Assessed_Machines__c, Asset__c, CreatedById, Current_Licence__c, Customer_Name__c, Deployment_Date__c, Name, Deployment_Status__c, Deployment_Type__c, Discovered_Machines__c, Install_Date__c, LastModifiedById, Last_Updated__c, Licence_GUID__c, Managed_App_Location__c, OwnerId, Provisioning_Status__c, Renewal_Date__c, Renewal_Licence__c FROM Deployment__c" -r csv > "${outputFilePath}"`;
+
+  console.log(`Executing command: ${queryCommand}`);
+
+  exec(queryCommand, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      event.reply('query-error', error.message);
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      event.reply('query-error', stderr);
+      return;
+    }
+    console.log('Salesforce query completed successfully.');
+    event.reply('query-success', outputFilePath);
+    checkFileExists(outputFilePath, event); // Check file after query completes
+  });
+});
+
+// Check if the Salesforce CSV file exists
+ipcMain.on('check-file-exists', (event) => {
+  const outputFilePath = path.join(__dirname, 'output', 'salesforce.csv');
+  checkFileExists(outputFilePath, event);
+});
+
+// Function to check if the file exists
+function checkFileExists(filePath, event) {
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      event.reply('file-exists-status', false); // File does not exist
+    } else {
+      event.reply('file-exists-status', true); // File exists
+    }
+  });
+}
 
 // Handle opening of the device login page inside the Electron app
 ipcMain.on('open-login-window', (event, loginUrl) => {
@@ -27,18 +75,15 @@ ipcMain.on('open-login-window', (event, loginUrl) => {
     width: 500,
     height: 600,
     webPreferences: {
-      nodeIntegration: false, // We don't need node integration in this window
-      contextIsolation: true, // Isolate contexts for better security
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
-
-  // Load the Azure device login URL inside the Electron window
   loginWindow.loadURL(loginUrl);
 });
 
 // Handle opening customer URL in external browser
 ipcMain.on('open-customer-url', (event, customerUrl) => {
-  // Use Electron shell to open the URL in the external browser
   shell.openExternal(customerUrl);
 });
 
@@ -55,3 +100,6 @@ app.on('activate', () => {
     createMainWindow();
   }
 });
+
+// Wait for the app to be ready before creating windows
+app.on('ready', createMainWindow);

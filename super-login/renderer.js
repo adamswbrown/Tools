@@ -3,6 +3,8 @@ const { ApplicationClient } = require('@azure/arm-managedapplications');
 const { SubscriptionClient } = require('@azure/arm-subscriptions');
 const { ipcRenderer, clipboard } = require('electron');
 const XLSX = require('xlsx');
+const fs = require('fs');
+const path = require('path');
 
 let abortController = null;
 let credential = null;
@@ -12,6 +14,9 @@ let managedApplications = [];
 // Default customer list URL
 let customerListURL = "https://drmigratecode.blob.core.windows.net/marketplace-deployments/DrMigrateCustomerVersionInformationReport.xlsx?sp=r&st=2024-10-14T12:04:16Z&se=2099-10-14T20:04:16Z&spr=https&sv=2022-11-02&sr=b&sig=ePwMdva3AZQamDZBDDE3WbNLPCbc2Ffub9fWyCRoBnY%3D";
 
+// Define the file path
+const salesforceCsvPath = path.join(__dirname, 'output', 'salesforce.csv');
+
 // Load tenants from localStorage or default to the current ones
 let tenants = JSON.parse(localStorage.getItem('tenants')) || {
   '95e3e402-49e1-4ad0-b73d-18c03e864448': 'Altra',
@@ -20,6 +25,9 @@ let tenants = JSON.parse(localStorage.getItem('tenants')) || {
 
 // Load customer list URL from localStorage or set default
 customerListURL = localStorage.getItem('customerListURL') || customerListURL;
+
+// Check if Salesforce file exists at startup
+checkFileStatus();
 
 // Load tenants into the tenant dropdown
 function loadTenantsDropdown() {
@@ -356,54 +364,20 @@ async function getSubscriptions(credential) {
 
 // Function to format the date to UK format (dd/mm/yyyy)
 function formatUKDate(dateString) {
-    if (!dateString) return 'N/A';
-    const [year, month, day] = dateString.split('/');
-    return `${day}/${month}/${year}`;
-  }
-  
+  if (!dateString) return 'N/A';
+  const [year, month, day] = dateString.split('/');
+  return `${day}/${month}/${year}`;
+}
+
 // Updated updateTable function
 function updateTable(managedApps) {
-    console.log("Updating table with Managed Applications...");
-    const tableContainer = document.getElementById('table-container');
-    tableContainer.style.display = 'block';
-  
-    if (!document.getElementById('managed-apps-table')) {
-      let tableHtml = `
-        <table id="managed-apps-table">
-          <tr>
-            <th>#</th>
-            <th>Customer Name</th>
-            <th>Managed Application Name</th>
-            <th>Install Date</th>
-            <th>Subscription Name</th>
-            <th>Subscription ID</th>
-            <th>Resource Group</th>
-            <th>Location</th>
-            <th>Actions</th>
-          </tr>
-      `;
-      managedApps.forEach((app, index) => {
-        const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
-        tableHtml += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${app.customerName}</td>
-            <td>${app.name}</td>
-            <td>${formattedInstallDate}</td>
-            <td>${app.subscriptionName}</td>
-            <td>${app.subscriptionId}</td>
-            <td>${app.resourceGroup}</td>
-            <td>${app.location}</td>
-            <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
-          </tr>
-        `;
-      });
-      tableHtml += '</table>';
-      tableContainer.innerHTML = tableHtml;
-      document.getElementById('search-container').style.display = 'block';
-    } else {
-      const existingTable = document.getElementById('managed-apps-table');
-      existingTable.innerHTML = `
+  console.log("Updating table with Managed Applications...");
+  const tableContainer = document.getElementById('table-container');
+  tableContainer.style.display = 'block';
+
+  if (!document.getElementById('managed-apps-table')) {
+    let tableHtml = `
+      <table id="managed-apps-table">
         <tr>
           <th>#</th>
           <th>Customer Name</th>
@@ -415,11 +389,11 @@ function updateTable(managedApps) {
           <th>Location</th>
           <th>Actions</th>
         </tr>
-      `;
-      managedApps.forEach((app, index) => {
-        const newRow = existingTable.insertRow(-1);
-        const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
-        newRow.innerHTML = `
+    `;
+    managedApps.forEach((app, index) => {
+      const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
+      tableHtml += `
+        <tr>
           <td>${index + 1}</td>
           <td>${app.customerName}</td>
           <td>${app.name}</td>
@@ -429,13 +403,46 @@ function updateTable(managedApps) {
           <td>${app.resourceGroup}</td>
           <td>${app.location}</td>
           <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
-        `;
-      });
-    }
-  
-    document.getElementById('total-applications-count').textContent = managedApps.length;
+        </tr>
+      `;
+    });
+    tableHtml += '</table>';
+    tableContainer.innerHTML = tableHtml;
+    document.getElementById('search-container').style.display = 'block';
+  } else {
+    const existingTable = document.getElementById('managed-apps-table');
+    existingTable.innerHTML = `
+      <tr>
+        <th>#</th>
+        <th>Customer Name</th>
+        <th>Managed Application Name</th>
+        <th>Install Date</th>
+        <th>Subscription Name</th>
+        <th>Subscription ID</th>
+        <th>Resource Group</th>
+        <th>Location</th>
+        <th>Actions</th>
+      </tr>
+    `;
+    managedApps.forEach((app, index) => {
+      const newRow = existingTable.insertRow(-1);
+      const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
+      newRow.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${app.customerName}</td>
+        <td>${app.name}</td>
+        <td>${formattedInstallDate}</td>
+        <td>${app.subscriptionName}</td>
+        <td>${app.subscriptionId}</td>
+        <td>${app.resourceGroup}</td>
+        <td>${app.location}</td>
+        <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
+      `;
+    });
   }
 
+  document.getElementById('total-applications-count').textContent = managedApps.length;
+}
 
 function showLoginPrompt(info) {
   const loginPromptContainer = document.getElementById('login-prompt');
@@ -465,14 +472,50 @@ function openCustomer(url) {
   require('electron').shell.openExternal(url);
 }
 
-// Updated DOMContentLoaded section to ensure elements exist before adding event listeners
+// Function to check if the Salesforce CSV file exists
+function checkFileStatus() {
+  const statusElement = document.getElementById('file-status-text');
+  fs.access(salesforceCsvPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.log('Salesforce CSV file not found.');
+      statusElement.innerHTML = 'File not downloaded <span style="color: red;">✗</span>';
+    } else {
+      console.log('Salesforce CSV file found.');
+      statusElement.innerHTML = 'File downloaded <span style="color: green;">✓</span>';
+    }
+  });
+}
+
+// Trigger Salesforce query
+function triggerSalesforceQuery() {
+  ipcRenderer.send('run-salesforce-query');
+}
+
+// Listen for query success and update file status
+ipcRenderer.on('query-success', (event, filePath) => {
+  console.log('Salesforce query completed. File saved at:', filePath);
+  checkFileStatus();  // Update file status after query completion
+});
+
+ipcRenderer.on('query-error', (event, error) => {
+  console.error('Error running Salesforce query:', error);
+  alert('Failed to run Salesforce query. Please check the console for more details.');
+});
+
+// DOMContentLoaded to add event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Ensure that elements exist in the DOM before accessing them.
+  loadTenantsDropdown();
+  loadTenantList();
+  loadCustomerData();
+
+  document.getElementById('run-salesforce-button').addEventListener('click', triggerSalesforceQuery);
+  
+  // Ensure that elements exist before adding other event listeners
   const loginButton = document.getElementById('login-button');
   if (loginButton) {
     loginButton.addEventListener('click', loginToAzure);
   }
-  
+
   const refreshButton = document.getElementById('refresh-button');
   if (refreshButton) {
     refreshButton.addEventListener('click', refreshManagedApplications);
@@ -493,17 +536,15 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', filterApplications);
   }
 
-  const saveCustomerListButton = document.getElementById('save-customer-list-button');
+  const saveCustomerListButton = document.getElementById('save-customer-list-url');
   if (saveCustomerListButton) {
     saveCustomerListButton.addEventListener('click', saveCustomerListURL);
   }
 
-  // Load initial tenants and customer data
-  loadTenantsDropdown();
-  loadTenantList();
-  loadCustomerData();
+  checkFileStatus(); // Initial check when the page is loaded
 });
 
+// Filter applications based on search input
 function filterApplications() {
   const searchInput = document.getElementById('search-input').value.toLowerCase();
   const table = document.getElementById('managed-apps-table');
@@ -543,4 +584,3 @@ function saveCustomerListURL() {
     alert("Please enter a valid customer list URL.");
   }
 }
-

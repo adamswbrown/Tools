@@ -93,9 +93,16 @@
         <label for="customer-list-url">Customer List URL:</label>
         <input type="text" id="customer-list-url" placeholder="Enter the URL for Customer List">
       </div>
-      <button id="save-customer-list-url" class="btn btn-add" onclick="saveCustomerListUrl()">Save URL</button>
+      <button id="save-customer-list-url" class="btn btn-add" onclick="saveCustomerListURL()">Save URL</button>
+
+      <!-- Salesforce Query Button -->
+      <h3>File Download Status</h3>
+      <div>
+        <p id="file-status-text">Checking file status...</p>
+        <button id="run-salesforce-button" class="btn btn-add">Run Salesforce Query</button>
+      </div>
     </div>
-    
+
     <script src="renderer.js"></script>
 
     <script>
@@ -108,6 +115,7 @@
         document.getElementById('search-tab').style.display = 'none';
         document.getElementById('admin-tab').style.display = 'block';
         loadTenantList();
+        checkFileStatus(); // Check file status when the admin tab is displayed
       }
     </script>
 
