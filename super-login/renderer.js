@@ -354,14 +354,56 @@ async function getSubscriptions(credential) {
   }
 }
 
+// Function to format the date to UK format (dd/mm/yyyy)
+function formatUKDate(dateString) {
+    if (!dateString) return 'N/A';
+    const [year, month, day] = dateString.split('/');
+    return `${day}/${month}/${year}`;
+  }
+  
+// Updated updateTable function
 function updateTable(managedApps) {
-  console.log("Updating table with Managed Applications...");
-  const tableContainer = document.getElementById('table-container');
-  tableContainer.style.display = 'block';
-
-  if (!document.getElementById('managed-apps-table')) {
-    let tableHtml = `
-      <table id="managed-apps-table">
+    console.log("Updating table with Managed Applications...");
+    const tableContainer = document.getElementById('table-container');
+    tableContainer.style.display = 'block';
+  
+    if (!document.getElementById('managed-apps-table')) {
+      let tableHtml = `
+        <table id="managed-apps-table">
+          <tr>
+            <th>#</th>
+            <th>Customer Name</th>
+            <th>Managed Application Name</th>
+            <th>Install Date</th>
+            <th>Subscription Name</th>
+            <th>Subscription ID</th>
+            <th>Resource Group</th>
+            <th>Location</th>
+            <th>Actions</th>
+          </tr>
+      `;
+      managedApps.forEach((app, index) => {
+        const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
+        tableHtml += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${app.customerName}</td>
+            <td>${app.name}</td>
+            <td>${formattedInstallDate}</td>
+            <td>${app.subscriptionName}</td>
+            <td>${app.subscriptionId}</td>
+            <td>${app.resourceGroup}</td>
+            <td>${app.location}</td>
+            <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
+          </tr>
+        `;
+      });
+      tableHtml += '</table>';
+      tableContainer.innerHTML = tableHtml;
+      document.getElementById('search-container').style.display = 'block';
+    } else {
+      const existingTable = document.getElementById('managed-apps-table');
+      existingTable.innerHTML = `
         <tr>
           <th>#</th>
           <th>Customer Name</th>
@@ -373,58 +415,27 @@ function updateTable(managedApps) {
           <th>Location</th>
           <th>Actions</th>
         </tr>
-    `;
-    managedApps.forEach((app, index) => {
-      tableHtml += `
-        <tr>
+      `;
+      managedApps.forEach((app, index) => {
+        const newRow = existingTable.insertRow(-1);
+        const formattedInstallDate = formatUKDate(app.installDate); // Format the install date to UK format
+        newRow.innerHTML = `
           <td>${index + 1}</td>
           <td>${app.customerName}</td>
           <td>${app.name}</td>
-          <td>${app.installDate}</td>
+          <td>${formattedInstallDate}</td>
           <td>${app.subscriptionName}</td>
           <td>${app.subscriptionId}</td>
           <td>${app.resourceGroup}</td>
           <td>${app.location}</td>
           <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
-        </tr>
-      `;
-    });
-    tableHtml += '</table>';
-    tableContainer.innerHTML = tableHtml;
-    document.getElementById('search-container').style.display = 'block';
-  } else {
-    const existingTable = document.getElementById('managed-apps-table');
-    existingTable.innerHTML = `
-      <tr>
-        <th>#</th>
-        <th>Customer Name</th>
-        <th>Managed Application Name</th>
-        <th>Kind</th>
-        <th>Subscription Name</th>
-        <th>Subscription ID</th>
-        <th>Resource Group</th>
-        <th>Location</th>
-        <th>Actions</th>
-      </tr>
-    `;
-    managedApps.forEach((app, index) => {
-      const newRow = existingTable.insertRow(-1);
-      newRow.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${app.customerName}</td>
-        <td>${app.name}</td>
-        <td>${app.insa}</td>
-        <td>${app.subscriptionName}</td>
-        <td>${app.subscriptionId}</td>
-        <td>${app.resourceGroup}</td>
-        <td>${app.location}</td>
-        <td><button class="open-customer-btn" onclick="openCustomer('${app.url}')">Open Customer 🚀</button></td>
-      `;
-    });
+        `;
+      });
+    }
+  
+    document.getElementById('total-applications-count').textContent = managedApps.length;
   }
 
-  document.getElementById('total-applications-count').textContent = managedApps.length;
-}
 
 function showLoginPrompt(info) {
   const loginPromptContainer = document.getElementById('login-prompt');
@@ -533,9 +544,3 @@ function saveCustomerListURL() {
   }
 }
 
-function formatUKDate(dateString) {
-    if (!dateString) return 'N/A';
-  
-    const [year, month, day] = dateString.split('/');
-    return `${day}/${month}/${year}`;
-  }

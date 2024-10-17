@@ -1,13 +1,12 @@
-
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 
 let mainWindow;
 
-app.on('ready', () => {
+function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1400,
+    height: 900,
     webPreferences: {
       // Comment out the preload script since it's missing
       // preload: path.join(__dirname, 'preload.js'),
@@ -17,7 +16,10 @@ app.on('ready', () => {
   });
 
   mainWindow.loadFile('index.html');
-});
+}
+
+// Wait for the app to be ready before creating windows
+app.on('ready', createMainWindow);
 
 // Handle opening of the device login page inside the Electron app
 ipcMain.on('open-login-window', (event, loginUrl) => {
@@ -40,26 +42,16 @@ ipcMain.on('open-customer-url', (event, customerUrl) => {
   shell.openExternal(customerUrl);
 });
 
-// Quit the application when all windows are closed
+// Quit the application when all windows are closed, except on macOS
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
+// Re-create a window in the app when the dock icon is clicked (macOS)
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    mainWindow = new BrowserWindow({
-      width: 1200,
-      height: 800,
-      webPreferences: {
-        // Comment out the preload script again here
-        // preload: path.join(__dirname, 'preload.js'),
-        nodeIntegration: true,
-        contextIsolation: false,
-      },
-    });
-
-    mainWindow.loadFile('index.html');
+    createMainWindow();
   }
 });

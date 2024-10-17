@@ -9,6 +9,7 @@
         "@azure/arm-managedapplications": "^3.0.0",
         "@azure/arm-subscriptions": "^5.1.0",
         "@azure/identity": "^4.4.1",
+        "jsforce": "^3.5.2",
         "xlsx": "^0.18.5"
     }
 }
