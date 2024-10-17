@@ -10,6 +10,7 @@ let abortController = null;
 let credential = null;
 let tokenExpirationTime = null;
 let managedApplications = [];
+let subscriptionList = []; // Define it at the top level of the script
 
 // Default customer list URL
 let customerListURL = "https://drmigratecode.blob.core.windows.net/marketplace-deployments/DrMigrateCustomerVersionInformationReport.xlsx?sp=r&st=2024-10-14T12:04:16Z&se=2099-10-14T20:04:16Z&spr=https&sv=2022-11-02&sr=b&sig=ePwMdva3AZQamDZBDDE3WbNLPCbc2Ffub9fWyCRoBnY%3D";
@@ -97,22 +98,43 @@ setInterval(checkTokenExpiration, 60000);
 
 // Function to load customer data from the Excel file
 async function loadCustomerData() {
-  console.log(`Loading customer data from URL: ${customerListURL}`);
+  if (fs.existsSync(salesforceCsvPath)) {
+    console.log(`Salesforce CSV found. Loading data from ${salesforceCsvPath}`);
+    const salesforceData = await readSalesforceCSV(); // Load data from Salesforce CSV
 
-  try {
-    const response = await fetch(customerListURL);
-    const data = await response.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array" });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    const customerData = XLSX.utils.sheet_to_json(firstSheet);
-
-    console.log("Customer data loaded successfully.");
-    return customerData;
-  } catch (error) {
-    console.error("Error loading customer data:", error);
-    return [];
+    return salesforceData; // Return the loaded data
+  } else {
+    // Fallback to existing logic for loading from blob storage
+    console.log(`Loading customer data from URL: ${customerListURL}`);
+    try {
+      const response = await fetch(customerListURL);
+      const data = await response.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const customerData = XLSX.utils.sheet_to_json(firstSheet);
+      console.log("Customer data loaded successfully.");
+      return customerData;
+    } catch (error) {
+      console.error("Error loading customer data:", error);
+      return [];
+    }
   }
 }
+
+// Update your matching logic when processing managed applications
+for (const subscription of subscriptionList) {
+  // Match with Salesforce data
+  const matchedCustomer = salesforceData.find(cust => cust['Subscription_ID__c'] === subscription.id);
+  if (matchedCustomer) {
+    // Use the matched customer data
+    managedApplications.push({
+      customerName: matchedCustomer['Customer_Name__c'], // Use the customer name from Salesforce
+      // other properties...
+    });
+  }
+}
+
+
 
 async function loginToAzure() {
   console.log("Login button clicked - attempting Azure login");
@@ -193,7 +215,8 @@ async function loginToAzure() {
             console.log(`Managed Application found: ${managedApp.name}`);
             const vmUrl = `https://portal.azure.com/#@${selectedTenantDomain}/resource/subscriptions/${subscription.id}/resources`;
 
-            const matchedCustomer = customerData.find(cust => cust['Subscription Id'] === subscription.id);
+           const matchedCustomer = customerData.find(cust => cust['Subscription_ID__c'] === subscription.id);
+
 
             managedApplications.push({
               customerName: matchedCustomer ? matchedCustomer['CustomerName'] : 'Unknown',
@@ -482,6 +505,55 @@ function checkFileStatus() {
     } else {
       console.log('Salesforce CSV file found.');
       statusElement.innerHTML = 'File downloaded <span style="color: green;">✓</span>';
+    }
+  });
+}
+// Function to read Salesforce CSV and extract relevant data
+async function readSalesforceCSV() {
+  return new Promise((resolve, reject) => {
+    fs.readFile(salesforceCsvPath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading Salesforce CSV:', err);
+        return reject(err);
+      }
+
+      const parsedData = [];
+      const rows = data.split('\n');
+      const headers = rows[0].split(',').map(header => header.trim());
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i].split(',');
+        if (row.length === headers.length) {
+          const entry = {};
+          headers.forEach((header, index) => {
+            entry[header] = row[index].trim();
+          });
+          parsedData.push(entry);
+        }
+      }
+      console.log("Parsed Salesforce CSV Data:", parsedData); // Log the parsed data
+      resolve(parsedData);
+    });
+  });
+}
+
+// Function to run Salesforce query and update table
+async function runSalesforceQuery() {
+  ipcRenderer.send('run-salesforce-query');
+
+  ipcRenderer.on('query-success', async (event, filePath) => {
+    console.log('Salesforce query completed. File saved at:', filePath);
+    checkFileStatus(); // Update file status after query completion
+
+    // Use the updated subscription list for processing here
+    if (subscriptionList.length > 0) {
+      for (const subscription of subscriptionList) {
+        // Your existing matching logic goes here
+        const matchedCustomer = salesforceData.find(cust => cust['Subscription_ID__c'] === subscription.id);
+        // Process matched customers
+      }
+    } else {
+      console.warn('No subscriptions available for processing.');
     }
   });
 }
