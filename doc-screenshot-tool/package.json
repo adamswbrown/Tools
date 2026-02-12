@@ -1,0 +1,19 @@
+{
+  "name": "doc-screenshot-tool",
+  "version": "1.0.0",
+  "description": "Automated web application screenshot tool for documentation. Crawls authenticated web apps, discovers UI sections, and captures organized full-page screenshots.",
+  "main": "src/index.js",
+  "bin": {
+    "doc-screenshots": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0",
+    "commander": "^12.1.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1"
+  }
+}
