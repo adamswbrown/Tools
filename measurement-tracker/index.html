@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Measures">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <button class="nav-btn active" data-page="form">Measure</button>
+            <button class="nav-btn" data-page="history">History</button>
+            <button class="nav-btn" data-page="settings">Settings</button>
+        </nav>
+
+        <!-- Form Page -->
+        <div id="page-form" class="page active">
+            <header>
+                <h1>Measurement Tracker</h1>
+                <p class="subtitle">Record body measurements</p>
+            </header>
+
+            <form id="measurement-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="name">Person's Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter name">
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="measurements-grid">
+                    <div class="form-group">
+                        <label for="left-arm">Left Arm (in)</label>
+                        <input type="number" id="left-arm" name="leftArm" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="right-arm">Right Arm (in)</label>
+                        <input type="number" id="right-arm" name="rightArm" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="waist">Waist (in)</label>
+                        <input type="number" id="waist" name="waist" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="left-leg">Left Leg (in)</label>
+                        <input type="number" id="left-leg" name="leftLeg" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="right-leg">Right Leg (in)</label>
+                        <input type="number" id="right-leg" name="rightLeg" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chest">Chest (in)</label>
+                        <input type="number" id="chest" name="chest" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hips">Hips (in)</label>
+                        <input type="number" id="hips" name="hips" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn">
+                    <span class="btn-text">Save Measurements</span>
+                    <span class="btn-loading" hidden>Saving...</span>
+                </button>
+            </form>
+
+            <div id="status" class="status" hidden></div>
+
+            <div id="offline-queue" class="offline-queue" hidden>
+                <p><strong>Offline:</strong> <span id="queue-count">0</span> measurement(s) saved locally. They will sync when you're back online.</p>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="page-history" class="page">
+            <header>
+                <h1>Recent Entries</h1>
+                <p class="subtitle">Last 20 measurements submitted</p>
+            </header>
+
+            <div id="history-list" class="history-list">
+                <p class="empty-state">No measurements recorded yet.</p>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="page-settings" class="page">
+            <header>
+                <h1>Settings</h1>
+                <p class="subtitle">Connect to Google Sheets</p>
+            </header>
+
+            <div class="settings-card">
+                <h2>Google Spreadsheet Connection</h2>
+                <div id="connection-status" class="connection-badge disconnected">
+                    Not connected
+                </div>
+
+                <div class="form-group">
+                    <label for="script-url">Google Apps Script URL</label>
+                    <input type="url" id="script-url" placeholder="https://script.google.com/macros/s/.../exec">
+                </div>
+
+                <div class="settings-actions">
+                    <button id="save-url-btn" class="btn-primary">Save Connection</button>
+                    <button id="test-url-btn" class="btn-secondary">Test Connection</button>
+                    <button id="clear-url-btn" class="btn-danger">Disconnect</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2>How to Set Up</h2>
+                <div class="setup-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>Create a Google Spreadsheet</strong>
+                            <p>Open <a href="https://sheets.google.com" target="_blank" rel="noopener">Google Sheets</a> and create a new spreadsheet. Add these headers in Row 1:</p>
+                            <code class="header-example">Timestamp | Name | Date | Left Arm | Right Arm | Waist | Left Leg | Right Leg | Chest | Hips</code>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Add the Script</strong>
+                            <p>In your spreadsheet, go to <em>Extensions &gt; Apps Script</em>. Delete any existing code and paste the script below:</p>
+                            <button id="copy-script-btn" class="btn-secondary btn-small">Copy Script to Clipboard</button>
+                            <pre id="apps-script-code" class="code-block"></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Deploy as Web App</strong>
+                            <p>In the Apps Script editor:</p>
+                            <ol>
+                                <li>Click <em>Deploy &gt; New deployment</em></li>
+                                <li>Click the gear icon, select <em>Web app</em></li>
+                                <li>Set "Execute as" to <strong>Me</strong></li>
+                                <li>Set "Who has access" to <strong>Anyone</strong></li>
+                                <li>Click <strong>Deploy</strong> and authorize when prompted</li>
+                                <li>Copy the Web App URL</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>Paste the URL Above</strong>
+                            <p>Paste your Web App URL into the input field above and click <strong>Save Connection</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2>Data</h2>
+                <button id="clear-history-btn" class="btn-danger">Clear Local History</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
