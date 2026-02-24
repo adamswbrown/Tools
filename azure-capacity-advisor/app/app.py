@@ -28,7 +28,7 @@ from app.config import (
     MAX_DATASET_ROWS,
     REGION_DISPLAY_NAMES,
 )
-from azure_client.auth import AzureAuthError
+from azure_client.auth import AzureAuthError, AuthMethod, reset_credential, test_connection
 from azure_client.sku_service import SkuService, SkuServiceError
 from engine.alternatives import AlternativeEngine
 from engine.analyzer import Analyzer
@@ -133,15 +133,92 @@ def main() -> None:
         "Upload your dataset, run the analysis, and export the results."
     )
 
-    # --- Sidebar: configuration ---
+    # --- Sidebar: Azure Login ---
     with st.sidebar:
-        st.header("Configuration")
+        st.header("Azure Login")
+
+        auth_method_label = st.selectbox(
+            "Authentication method",
+            options=[m.value for m in AuthMethod],
+            index=0,
+            help=(
+                "**Default** — uses Azure CLI (`az login`), managed identity, "
+                "or env vars automatically.\n\n"
+                "**Service Principal** — enter client credentials directly.\n\n"
+                "**Device Code** — log in via browser with a one-time code.\n\n"
+                "**Interactive Browser** — opens a browser window to log in."
+            ),
+        )
+        auth_method = AuthMethod(auth_method_label)
+
         subscription_id = st.text_input(
-            "Azure Subscription ID",
+            "Subscription ID",
             value=AppConfig.from_env().subscription_id,
             type="password",
             help="Your Azure subscription ID. Can also be set via AZURE_SUBSCRIPTION_ID env var.",
         )
+
+        # Conditional fields based on auth method
+        tenant_id = ""
+        client_id = ""
+        client_secret = ""
+
+        if auth_method == AuthMethod.SERVICE_PRINCIPAL:
+            tenant_id = st.text_input(
+                "Tenant ID",
+                type="password",
+                help="Azure AD tenant ID (Directory ID).",
+            )
+            client_id = st.text_input(
+                "Client ID",
+                type="password",
+                help="App registration client ID (Application ID).",
+            )
+            client_secret = st.text_input(
+                "Client Secret",
+                type="password",
+                help="App registration client secret.",
+            )
+
+        if auth_method in (AuthMethod.DEVICE_CODE, AuthMethod.INTERACTIVE_BROWSER):
+            tenant_id = st.text_input(
+                "Tenant ID (optional)",
+                help="Azure AD tenant ID. Leave blank for multi-tenant.",
+            )
+
+        # Test connection button
+        col_test, col_clear = st.columns(2)
+        with col_test:
+            if st.button("Test Connection", use_container_width=True):
+                if not subscription_id:
+                    st.error("Enter a Subscription ID first.")
+                else:
+                    try:
+                        with st.spinner("Authenticating..."):
+                            test_connection(
+                                subscription_id=subscription_id,
+                                method=auth_method,
+                                tenant_id=tenant_id,
+                                client_id=client_id,
+                                client_secret=client_secret,
+                            )
+                        st.session_state["auth_verified"] = True
+                        st.session_state["auth_method"] = auth_method
+                        st.success("Connected!")
+                    except AzureAuthError as exc:
+                        st.session_state["auth_verified"] = False
+                        st.error(f"Auth failed: {exc}")
+        with col_clear:
+            if st.button("Reset Auth", use_container_width=True):
+                reset_credential()
+                st.session_state.pop("auth_verified", None)
+                st.session_state.pop("auth_method", None)
+                st.info("Credentials cleared.")
+
+        # Show auth status
+        if st.session_state.get("auth_verified"):
+            current = st.session_state.get("auth_method", auth_method)
+            st.success(f"Authenticated via {current}")
 
         st.divider()
         st.header("Options")
@@ -216,7 +293,13 @@ def main() -> None:
     if st.button("Run Analysis", type="primary", use_container_width=True):
         try:
             with st.spinner("Authenticating with Azure..."):
-                sku_service = SkuService(subscription_id=subscription_id)
+                sku_service = SkuService(
+                    subscription_id=subscription_id,
+                    auth_method=auth_method,
+                    tenant_id=tenant_id,
+                    client_id=client_id,
+                    client_secret=client_secret,
+                )
 
             with st.spinner("Fetching Azure VM SKU catalog (this may take a moment on first run)..."):
                 sku_service.fetch_skus()

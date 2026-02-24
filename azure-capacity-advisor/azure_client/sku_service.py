@@ -20,7 +20,7 @@ from tenacity import (
     before_sleep_log,
 )
 
-from azure_client.auth import get_access_token
+from azure_client.auth import AuthMethod, get_access_token
 from app.config import (
     AZURE_COMPUTE_SKU_API_VERSION,
     AZURE_MAX_RETRIES,
@@ -202,12 +202,24 @@ class SkuCache:
 class SkuService:
     """Service for fetching and querying Azure VM SKU availability."""
 
-    def __init__(self, subscription_id: str, cache_ttl: int = SKU_CACHE_TTL_SECONDS) -> None:
+    def __init__(
+        self,
+        subscription_id: str,
+        cache_ttl: int = SKU_CACHE_TTL_SECONDS,
+        auth_method: AuthMethod = AuthMethod.DEFAULT,
+        tenant_id: str = "",
+        client_id: str = "",
+        client_secret: str = "",
+    ) -> None:
         """Initialize the SKU service.
 
         Args:
             subscription_id: Azure subscription ID.
             cache_ttl: Cache time-to-live in seconds.
+            auth_method: Authentication method to use.
+            tenant_id: For Service Principal / Device Code.
+            client_id: For Service Principal.
+            client_secret: For Service Principal.
         """
         if not subscription_id:
             raise SkuServiceError(
@@ -215,6 +227,10 @@ class SkuService:
                 "Set the AZURE_SUBSCRIPTION_ID environment variable."
             )
         self._subscription_id = subscription_id
+        self._auth_method = auth_method
+        self._tenant_id = tenant_id
+        self._client_id = client_id
+        self._client_secret = client_secret
         self._cache = SkuCache(ttl=cache_ttl)
         self._base_url = (
             f"https://management.azure.com/subscriptions/{subscription_id}"
@@ -267,7 +283,12 @@ class SkuService:
             logger.info("Returning %d SKUs from cache", len(self._cache.all_skus()))
             return self._cache.all_skus()
 
-        token = get_access_token()
+        token = get_access_token(
+            method=self._auth_method,
+            tenant_id=self._tenant_id,
+            client_id=self._client_id,
+            client_secret=self._client_secret,
+        )
         url = f"{self._base_url}?api-version={AZURE_COMPUTE_SKU_API_VERSION}&$filter=resourceType eq 'virtualMachines'"
 
         all_skus: list[SkuInfo] = []
