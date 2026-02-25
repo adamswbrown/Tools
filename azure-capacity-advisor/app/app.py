@@ -560,6 +560,25 @@ def _short_reason(result) -> str:
     return ""
 
 
+def _short_verdict(result) -> str:
+    """One-line verdict for expander labels."""
+    if result.status == SkuStatus.OK and result.capacity_verified is True:
+        return "Deploy"
+    if result.status == SkuStatus.OK and result.capacity_verified is None:
+        return "Catalogue OK"
+    # Needs alternative
+    if result.alternatives_detail:
+        top = result.alternatives_detail[0]
+        cap = top.get("capacity", "")
+        tag = "verified" if cap == "Verified" else "not checked" if cap != "Failed" else "no capacity"
+        return f"Use {top['name']} ({tag})"
+    if result.status == SkuStatus.RISK:
+        return "Zone limited"
+    if result.status == SkuStatus.BLOCKED:
+        return "Blocked — no alternative"
+    return "Unknown"
+
+
 def _render_server_row(result) -> str:
     """Build HTML for a single server row inside a family group.
 
@@ -638,10 +657,10 @@ def _render_server_row(result) -> str:
             )
         else:
             short = _short_reason(result)
-            reason_text = short if short else "No alternatives found"
+            reason_line = f" &mdash; {short}" if short else ""
             action_html = (
-                f'<div class="srv-action" style="color:#9CA3AF;">'
-                f'{reason_text}'
+                f'<div class="srv-action" style="color:#ef4444;">'
+                f'No alternative available{reason_line}'
                 f'</div>'
             )
 
@@ -821,21 +840,14 @@ def _render_grouped_view(
         ):
             st.markdown(header_html, unsafe_allow_html=True)
 
-            rows_html = "".join(_render_server_row(m) for m in members_sorted)
-            st.markdown(rows_html, unsafe_allow_html=True)
-
-            # Drill-down selector
-            member_names = [m.machine_name for m in members_sorted]
-            selected = st.selectbox(
-                "View server details",
-                options=["(select a server)"] + member_names,
-                key=f"fam_{fam_name}",
-                label_visibility="collapsed",
-            )
-            if selected and selected != "(select a server)":
-                sel_result = result_map.get(selected)
-                if sel_result:
-                    _render_machine_detail(sel_result, disk_results, show_header=False)
+            # Each server is its own expander — click to see detail
+            for m in members_sorted:
+                row_html = _render_server_row(m)
+                # Build a short label for the expander toggle
+                verdict = _short_verdict(m)
+                with st.expander(f"{m.machine_name}  —  {verdict}", expanded=False):
+                    st.markdown(row_html, unsafe_allow_html=True)
+                    _render_machine_detail(m, disk_results, show_header=False)
 
 
 def _results_to_dataframe(results: list) -> pd.DataFrame:
@@ -936,6 +948,215 @@ def _results_to_export_dataframe(results: list) -> pd.DataFrame:
             "Alternatives": _format_alternatives(r),
         })
     return pd.DataFrame(rows)
+
+
+def _build_updated_export(results: list) -> bytes:
+    """Build an Excel file that mirrors the original input format.
+
+    Re-reads the original uploaded Excel, updates the "Chosen SKU" column
+    to the recommended alternative where the original is blocked or has no
+    capacity, and appends advisory columns so the output can be re-ingested
+    by the same tool or Dr Migrate.
+
+    Falls back to a flat CSV-style Excel if the original file wasn't Excel.
+    """
+    raw_bytes = st.session_state.get("raw_bytes")
+    uploaded_name = st.session_state.get("uploaded_name", "")
+
+    # Build lookup: machine_name -> result
+    result_map = {r.machine_name: r for r in results}
+
+    is_excel = uploaded_name.lower().endswith((".xlsx", ".xls"))
+
+    if not is_excel or not raw_bytes:
+        # Fallback: flat export with the key columns
+        return _build_flat_export(results)
+
+    output = io.BytesIO()
+
+    try:
+        # Re-read the original Excel preserving all sheets
+        original = pd.ExcelFile(io.BytesIO(raw_bytes), engine="openpyxl")
+
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            for sheet_name in original.sheet_names:
+                if sheet_name.lower() == "servers":
+                    _write_updated_servers_sheet(
+                        writer, io.BytesIO(raw_bytes), sheet_name, result_map,
+                    )
+                else:
+                    # Copy other sheets as-is (e.g. Disks, Summary)
+                    df = pd.read_excel(
+                        io.BytesIO(raw_bytes),
+                        sheet_name=sheet_name,
+                        header=None,
+                        engine="openpyxl",
+                    )
+                    df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
+
+    except Exception as exc:
+        logger.warning("Failed to build mirrored Excel export: %s", exc)
+        return _build_flat_export(results)
+
+    return output.getvalue()
+
+
+def _write_updated_servers_sheet(
+    writer: pd.ExcelWriter,
+    raw_source: io.BytesIO,
+    sheet_name: str,
+    result_map: dict,
+) -> None:
+    """Write the Servers sheet with updated SKUs and advisory columns.
+
+    Preserves the original header rows (1-5) and structure. Headers are on
+    row 6. Data starts at row 7.
+    """
+    # Read the full sheet with no header (so rows 1-5 are kept as data)
+    raw_df = pd.read_excel(raw_source, sheet_name=sheet_name, header=None, engine="openpyxl")
+
+    # Row 6 (0-indexed row 5) is the header row
+    headers = raw_df.iloc[5].tolist()
+    header_lower = [str(h).strip().lower() for h in headers]
+
+    # Find key column indices
+    server_idx = None
+    sku_idx = None
+    for i, h in enumerate(header_lower):
+        if h == "server":
+            server_idx = i
+        if h == "chosen sku":
+            sku_idx = i
+
+    if server_idx is None or sku_idx is None:
+        # Can't map — write as-is
+        raw_df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
+        return
+
+    # Determine advisory column positions (append after last existing column)
+    n_cols = len(headers)
+    col_orig_sku = n_cols
+    col_status = n_cols + 1
+    col_verdict = n_cols + 2
+    col_reason = n_cols + 3
+
+    # Add header labels for new columns in the header row
+    raw_df.iloc[5, col_orig_sku] = "Original SKU"
+    raw_df.iloc[5, col_status] = "Capacity Status"
+    raw_df.iloc[5, col_verdict] = "Verdict"
+    raw_df.iloc[5, col_reason] = "Reason"
+
+    # Update data rows (row 7 onwards = 0-indexed row 6+)
+    for row_idx in range(6, len(raw_df)):
+        server_name = str(raw_df.iloc[row_idx, server_idx]).strip()
+        r = result_map.get(server_name)
+        if not r:
+            continue
+
+        original_sku = str(raw_df.iloc[row_idx, sku_idx]).strip()
+
+        # Decide whether to swap the SKU
+        needs_swap = (
+            r.status == SkuStatus.BLOCKED
+            or (r.status == SkuStatus.OK and r.capacity_verified is False)
+        )
+
+        best_alt = None
+        if needs_swap and r.alternatives_detail:
+            # Prefer verified alternatives
+            for alt in r.alternatives_detail:
+                if alt.get("capacity") == "Verified":
+                    best_alt = alt["name"]
+                    break
+            if not best_alt:
+                best_alt = r.alternatives_detail[0]["name"]
+
+        if best_alt:
+            raw_df.iloc[row_idx, sku_idx] = best_alt
+            raw_df.iloc[row_idx, col_orig_sku] = original_sku
+        else:
+            raw_df.iloc[row_idx, col_orig_sku] = ""
+
+        # Status
+        if r.status == SkuStatus.OK and r.capacity_verified is True:
+            raw_df.iloc[row_idx, col_status] = "Deploy"
+        elif r.status == SkuStatus.OK and r.capacity_verified is None:
+            raw_df.iloc[row_idx, col_status] = "Catalogue OK"
+        elif r.status == SkuStatus.OK and r.capacity_verified is False:
+            raw_df.iloc[row_idx, col_status] = "No Capacity"
+        elif r.status == SkuStatus.RISK:
+            raw_df.iloc[row_idx, col_status] = "Zone Limited"
+        elif r.status == SkuStatus.BLOCKED:
+            raw_df.iloc[row_idx, col_status] = "Blocked"
+        else:
+            raw_df.iloc[row_idx, col_status] = "Unknown"
+
+        # Verdict
+        if best_alt:
+            cap = next(
+                (a.get("capacity", "") for a in r.alternatives_detail if a["name"] == best_alt),
+                "",
+            )
+            if cap == "Verified":
+                cap_note = " (Capacity Verified)"
+            elif cap == "Failed":
+                cap_note = " (No Capacity - check manually)"
+            else:
+                cap_note = " (Not Capacity Checked)"
+            raw_df.iloc[row_idx, col_verdict] = f"Use {best_alt}{cap_note}"
+        elif r.status == SkuStatus.OK:
+            raw_df.iloc[row_idx, col_verdict] = "Keep"
+        elif r.status == SkuStatus.RISK:
+            raw_df.iloc[row_idx, col_verdict] = "Review zones"
+        elif r.status == SkuStatus.BLOCKED:
+            raw_df.iloc[row_idx, col_verdict] = "No alternative available — manual review required"
+        else:
+            raw_df.iloc[row_idx, col_verdict] = "No alternative available"
+
+        # Reason
+        raw_df.iloc[row_idx, col_reason] = _short_reason(r) or ""
+
+    raw_df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
+
+
+def _build_flat_export(results: list) -> bytes:
+    """Fallback flat Excel export when the original wasn't an Excel file."""
+    rows = []
+    for r in results:
+        best_alt = ""
+        alt_cap = ""
+        if r.alternatives_detail:
+            best_alt = r.alternatives_detail[0]["name"]
+            alt_cap = r.alternatives_detail[0].get("capacity", "Not Checked")
+
+        needs_swap = (
+            r.status == SkuStatus.BLOCKED
+            or (r.status == SkuStatus.OK and r.capacity_verified is False)
+        )
+
+        if needs_swap and best_alt:
+            cap_note = {"Verified": " (Capacity Verified)", "Failed": " (No Capacity)"}.get(alt_cap, " (Not Capacity Checked)")
+            verdict = f"Use {best_alt}{cap_note}"
+        elif needs_swap:
+            verdict = "No alternative available — manual review required"
+        elif r.status == SkuStatus.RISK:
+            verdict = "Review zones"
+        else:
+            verdict = "Keep"
+
+        rows.append({
+            "Server": r.machine_name,
+            "Target Azure Region": r.display_region,
+            "Chosen SKU": best_alt if (needs_swap and best_alt) else r.requested_sku,
+            "Original SKU": r.requested_sku if (needs_swap and best_alt) else "",
+            "Capacity Status": _build_readiness_label(r),
+            "Verdict": verdict,
+            "Reason": _short_reason(r) or "",
+        })
+
+    output = io.BytesIO()
+    pd.DataFrame(rows).to_excel(output, index=False, engine="openpyxl")
+    return output.getvalue()
 
 
 
@@ -1687,7 +1908,10 @@ def main() -> None:
         loaded_msg += f" Also loaded **{len(disks)}** disk entries."
     st.success(loaded_msg)
 
-    # Store disks in session state for later display (clear if no disks)
+    # Store parsed data in session state for later display and export
+    st.session_state["machines"] = machines
+    st.session_state["raw_bytes"] = raw_bytes
+    st.session_state["uploaded_name"] = uploaded.name
     if disks:
         st.session_state["disks"] = disks
     else:
@@ -2216,14 +2440,25 @@ def main() -> None:
             export_df = export_df[export_df["VM Family"].isin(family_filter)]
         if capacity_filter:
             export_df = export_df[export_df["Live Capacity"].isin(capacity_filter)]
-        csv_data = export_df.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="Download full results as CSV (includes Reason & Alternatives)",
-            data=csv_data,
-            file_name="capacity_advisor_servers.csv",
-            mime="text/csv",
-            width="stretch",
-        )
+        dl_col1, dl_col2 = st.columns(2)
+        with dl_col1:
+            excel_bytes = _build_updated_export(results)
+            st.download_button(
+                label="Download updated rightsizing export (.xlsx)",
+                data=excel_bytes,
+                file_name="capacity_advisor_updated.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                width="stretch",
+            )
+        with dl_col2:
+            csv_data = export_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="Download full analysis as CSV",
+                data=csv_data,
+                file_name="capacity_advisor_servers.csv",
+                mime="text/csv",
+                width="stretch",
+            )
 
     # ==================== DISKS TAB ====================
     if disk_tab is not None:
