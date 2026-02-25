@@ -2,8 +2,34 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Optional
+
+# Regex to parse Azure VM SKU names like Standard_D2as_v5, Standard_E192is_v6
+# Groups: (1) family prefix, (2) size digits, (3) feature suffix, (4) generation
+_SKU_FAMILY_RE = re.compile(
+    r"Standard_([A-Za-z]+?)(\d+)([a-z]*)_v(\d+)$", re.IGNORECASE
+)
+
+
+def _derive_vm_family(sku_name: str) -> Optional[str]:
+    """Derive the VM family from a SKU name.
+
+    Examples:
+        Standard_D2as_v5   → Dasv5
+        Standard_E4bs_v5   → Ebsv5
+        Standard_F8als_v6  → Falsv6
+        Standard_E192is_v6 → Eisv6
+        Standard_B2s_v2    → Bsv2
+    """
+    match = _SKU_FAMILY_RE.match(sku_name)
+    if match:
+        prefix = match.group(1)   # D, E, F, B, etc.
+        suffix = match.group(3)   # as, bs, als, s, ds, etc.
+        gen = match.group(4)      # 5, 6, 2, etc.
+        return f"{prefix}{suffix}v{gen}"
+    return None
 
 
 @dataclass
@@ -16,7 +42,7 @@ class Machine:
         recommended_sku: The SKU recommended by the rightsizing tool.
         vcpu: Number of virtual CPUs.
         memory_gb: Memory in gigabytes.
-        vm_family: The Azure VM family (e.g. Dsv5, B).
+        vm_family: The Azure VM family (e.g. Dasv5, Ebsv5).
     """
 
     name: str
@@ -33,6 +59,8 @@ class Machine:
         self.recommended_sku = self.recommended_sku.strip()
         if self.vm_family:
             self.vm_family = self.vm_family.strip()
+        elif self.recommended_sku:
+            self.vm_family = _derive_vm_family(self.recommended_sku)
 
     @property
     def display_region(self) -> str:

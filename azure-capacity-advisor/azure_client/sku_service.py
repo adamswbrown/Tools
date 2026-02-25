@@ -89,14 +89,14 @@ class SkuInfo:
         return None
 
     def is_restricted_in_region(self, region: str) -> bool:
-        """Check if this SKU is restricted in the given region."""
+        """Check if this SKU has a Location-level restriction in the given region.
+
+        Only checks Location restrictions (full block). Zone restrictions are
+        handled separately by is_zone_limited_in_region().
+        """
         region_lower = region.lower()
         for restriction in self.restrictions:
             if restriction.type == "Location":
-                if region_lower in [v.lower() for v in restriction.values]:
-                    return True
-            elif restriction.type == "Zone":
-                # Zone restrictions are per-region; flag as limited
                 if region_lower in [v.lower() for v in restriction.values]:
                     return True
         return False
@@ -157,6 +157,59 @@ def _parse_sku(raw: dict[str, Any]) -> Optional[SkuInfo]:
     )
 
 
+# Managed disk storage tier names in the Azure API
+_DISK_TIER_NAMES = {
+    "standard_lrs", "standardssd_lrs", "standardssd_zrs",
+    "premium_lrs", "premium_zrs", "premiumv2_lrs", "ultrassd_lrs",
+}
+
+
+def _parse_disk_sku(raw: dict[str, Any]) -> Optional[SkuInfo]:
+    """Parse a raw SKU dict from the API into a SkuInfo for disk tiers."""
+    if raw.get("resourceType") != "disks":
+        return None
+
+    name = raw.get("name", "")
+    # Only keep actual managed disk storage tiers, not VM host types
+    if name.lower() not in _DISK_TIER_NAMES:
+        return None
+
+    capabilities: dict[str, str] = {}
+    for cap in raw.get("capabilities", []):
+        capabilities[cap["name"]] = cap["value"]
+
+    restrictions: list[SkuRestriction] = []
+    for rest in raw.get("restrictions", []):
+        restriction_type = rest.get("type", "")
+        values: list[str] = []
+        reason_code = rest.get("reasonCode", "")
+        restriction_info = rest.get("restrictionInfo", {})
+        if restriction_type == "Location":
+            values = restriction_info.get("locations", [])
+        elif restriction_type == "Zone":
+            values = restriction_info.get("locations", [])
+        restrictions.append(
+            SkuRestriction(type=restriction_type, values=values, reason_code=reason_code)
+        )
+
+    locations = raw.get("locations", [])
+    location_info = raw.get("locationInfo", [])
+    zones: list[str] = []
+    if location_info:
+        zones = location_info[0].get("zones", [])
+
+    return SkuInfo(
+        name=name,
+        tier=raw.get("tier", ""),
+        size=raw.get("size", ""),
+        family=raw.get("family", ""),
+        locations=locations,
+        capabilities=capabilities,
+        restrictions=restrictions,
+        zones=zones,
+    )
+
+
 class SkuCache:
     """In-memory cache for SKU data with TTL."""
 
@@ -172,18 +225,41 @@ class SkuCache:
         return bool(self._data) and (time.time() - self._timestamp) < self._ttl
 
     def store(self, skus: list[SkuInfo]) -> None:
-        """Store a list of SKUs, indexing by name and region."""
+        """Store a list of SKUs, indexing by name and region.
+
+        The Azure API returns one entry per SKU per region. This method merges
+        duplicate entries so each SKU name maps to a single SkuInfo with all
+        locations, restrictions, and zone data combined.
+        """
         self._data.clear()
         self._region_index.clear()
         for sku in skus:
-            self._data[sku.name.lower()] = sku
+            key = sku.name.lower()
+            if key in self._data:
+                existing = self._data[key]
+                # Merge locations (avoid duplicates)
+                for loc in sku.locations:
+                    if loc.lower() not in [l.lower() for l in existing.locations]:
+                        existing.locations.append(loc)
+                # Merge restrictions
+                existing.restrictions.extend(sku.restrictions)
+                # Merge zones (avoid duplicates)
+                for z in sku.zones:
+                    if z not in existing.zones:
+                        existing.zones.append(z)
+            else:
+                self._data[key] = sku
             for loc in sku.locations:
                 loc_lower = loc.lower()
                 if loc_lower not in self._region_index:
                     self._region_index[loc_lower] = []
-                self._region_index[loc_lower].append(sku.name.lower())
+                if key not in self._region_index[loc_lower]:
+                    self._region_index[loc_lower].append(key)
         self._timestamp = time.time()
-        logger.info("Cached %d VM SKUs across %d regions", len(self._data), len(self._region_index))
+        logger.info(
+            "Cached %d unique VM SKUs across %d regions (from %d API entries)",
+            len(self._data), len(self._region_index), len(skus),
+        )
 
     def get_sku(self, name: str) -> Optional[SkuInfo]:
         """Look up a SKU by name (case-insensitive)."""
@@ -232,6 +308,7 @@ class SkuService:
         self._client_id = client_id
         self._client_secret = client_secret
         self._cache = SkuCache(ttl=cache_ttl)
+        self._disk_cache = SkuCache(ttl=cache_ttl)
         self._base_url = (
             f"https://management.azure.com/subscriptions/{subscription_id}"
             f"/providers/Microsoft.Compute/skus"
@@ -343,3 +420,64 @@ class SkuService:
             List of SkuInfo objects available in the region.
         """
         return self._cache.get_skus_in_region(region)
+
+    def fetch_disk_skus(self, force_refresh: bool = False) -> list[SkuInfo]:
+        """Fetch managed disk tier SKUs from Azure.
+
+        Returns SkuInfo entries for disk storage tiers (Standard_LRS,
+        Premium_LRS, StandardSSD_LRS, UltraSSD_LRS, PremiumV2_LRS, etc.).
+
+        Args:
+            force_refresh: If True, ignore the cache and re-fetch.
+
+        Returns:
+            List of merged SkuInfo objects for disk tiers.
+        """
+        if self._disk_cache.is_valid and not force_refresh:
+            logger.info("Returning %d disk SKUs from cache", len(self._disk_cache.all_skus()))
+            return self._disk_cache.all_skus()
+
+        token = get_access_token(
+            method=self._auth_method,
+            tenant_id=self._tenant_id,
+            client_id=self._client_id,
+            client_secret=self._client_secret,
+        )
+        url = (
+            f"{self._base_url}?api-version={AZURE_COMPUTE_SKU_API_VERSION}"
+            f"&$filter=resourceType eq 'disks'"
+        )
+
+        all_disk_skus: list[SkuInfo] = []
+        page_count = 0
+
+        try:
+            while url:
+                page_count += 1
+                logger.info("Fetching disk SKU page %d ...", page_count)
+                data = self._fetch_page(url, token)
+
+                for raw_sku in data.get("value", []):
+                    parsed = _parse_disk_sku(raw_sku)
+                    if parsed:
+                        all_disk_skus.append(parsed)
+
+                url = data.get("nextLink")
+
+        except requests.HTTPError as exc:
+            raise SkuServiceError(
+                f"Azure API returned HTTP {exc.response.status_code}: {exc.response.text}"
+            ) from exc
+        except requests.RequestException as exc:
+            raise SkuServiceError(f"Network error fetching disk SKUs: {exc}") from exc
+
+        self._disk_cache.store(all_disk_skus)
+        logger.info("Fetched %d disk SKU entries in %d pages", len(all_disk_skus), page_count)
+        return all_disk_skus
+
+    def get_disk_tier_info(self, tier_name: str) -> Optional[SkuInfo]:
+        """Look up a disk storage tier by name (e.g. 'Standard_LRS').
+
+        Requires that fetch_disk_skus() has been called at least once.
+        """
+        return self._disk_cache.get_sku(tier_name)
