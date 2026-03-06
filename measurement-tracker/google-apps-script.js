@@ -17,25 +17,31 @@
  */
 
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
 
-  sheet.appendRow([
-    data.timestamp,
-    data.name,
-    data.date,
-    data.leftArm,
-    data.rightArm,
-    data.waist,
-    data.leftLeg,
-    data.rightLeg,
-    data.chest,
-    data.hips
-  ]);
+    sheet.appendRow([
+      data.timestamp,
+      data.name,
+      data.date,
+      data.leftArm,
+      data.rightArm,
+      data.waist,
+      data.leftLeg,
+      data.rightLeg,
+      data.chest,
+      data.hips
+    ]);
 
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok' }))
-    .setMimeType(ContentService.MimeType.JSON);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function doGet(e) {
