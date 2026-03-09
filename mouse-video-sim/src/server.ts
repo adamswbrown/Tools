@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/output', express.static(path.join(__dirname, '..', 'output')));
 
 app.post('/api/simulate', async (req, res) => {
-  const { apiKey, url, instructions, width, height } = req.body;
+  const { apiKey, url, instructions, pageContext, width, height } = req.body;
 
   if (!apiKey || !url || !instructions) {
     res.status(400).json({ error: 'Missing required fields: apiKey, url, instructions' });
@@ -36,9 +36,13 @@ app.post('/api/simulate', async (req, res) => {
       sendProgress({ type: 'progress', ...progress });
     });
 
+    const fullInstructions = pageContext
+      ? `Context about this UI: ${pageContext}\n\nSteps to perform:\n${instructions}`
+      : instructions;
+
     const videoPath = await simulator.run(
       url,
-      instructions,
+      fullInstructions,
       width || 1280,
       height || 720
     );

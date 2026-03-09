@@ -251,9 +251,12 @@
     <p class="subtitle">Describe webpage interactions in plain English and get a realistic screen recording as MP4</p>
 
     <div class="hint">
-      <strong>How it works:</strong> Provide a URL and describe what you want to happen — e.g.
-      <code>Click the "Sign In" button, wait for the login page to load, type "user@example.com" in the email field, type "password123" in the password field, then click "Submit"</code>.
-      The tool will simulate realistic mouse movements and record the interaction.
+      <strong>How it works:</strong> The tool loads your page first, analyzes every button, input, and link,
+      takes a screenshot, and sends all of that to Claude alongside your instructions. This means Claude
+      knows <em>exactly</em> what's on your page before generating mouse movements.
+      <br><br>
+      Just describe what you want in plain English, e.g.
+      <code>Click the "Sign In" button, wait for the login page to load, type "user@example.com" in the email field, then click "Submit"</code>.
     </div>
 
     <form id="simForm">
@@ -270,6 +273,11 @@
       <div class="form-group">
         <label>Instructions</label>
         <textarea id="instructions" placeholder="Describe the interactions you want to simulate...&#10;&#10;Example:&#10;Click the &quot;Login&quot; button in the top right corner.&#10;Wait for the login form to appear.&#10;Click on the email input field and type &quot;demo@example.com&quot;.&#10;Click on the password field and type &quot;password123&quot;.&#10;Click the &quot;Sign In&quot; button." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Additional Page Context <span style="color:#666;text-transform:none;letter-spacing:0">(optional — describe your UI for better accuracy)</span></label>
+        <textarea id="pageContext" style="min-height:80px" placeholder="Optional: Tell the AI about your interface...&#10;&#10;Example:&#10;This is the admin dashboard for our CRM. The sidebar has navigation links. The main area shows a data table with customer records. The &quot;New Customer&quot; button is a blue button in the top-right of the content area."></textarea>
       </div>
 
       <div class="form-group">
@@ -319,6 +327,7 @@
       const apiKey = document.getElementById('apiKey').value.trim();
       const url = document.getElementById('url').value.trim();
       const instructions = document.getElementById('instructions').value.trim();
+      const pageContext = document.getElementById('pageContext').value.trim();
       const width = parseInt(document.getElementById('width').value) || 1280;
       const height = parseInt(document.getElementById('height').value) || 720;
 
@@ -338,7 +347,7 @@
         const response = await fetch('/api/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey, url, instructions, width, height }),
+          body: JSON.stringify({ apiKey, url, instructions, pageContext, width, height }),
         });
 
         if (!response.ok) {

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ParsedScenario, BrowserAction, SimulationProgress } from './types';
 import { parseInstructions } from './instruction-parser';
 import { findElement } from './element-finder';
+import { analyzePage, formatPageAnalysis } from './page-analyzer';
 import {
   CURSOR_INJECT_SCRIPT,
   generateBezierPath,
@@ -45,26 +46,64 @@ export class Simulator {
     fs.mkdirSync(videoDir, { recursive: true });
 
     try {
-      // Step 1: Parse instructions
+      // Step 1: Launch browser and load the page (without recording yet)
       this.onProgress({
-        status: 'parsing',
-        message: 'Interpreting your instructions with Claude...',
+        status: 'launching',
+        message: 'Launching browser and loading page...',
       });
 
-      const scenario = await parseInstructions(url, instructions, this.apiKey);
+      this.browser = await chromium.launch({
+        headless: true,
+      });
+
+      // First context: load the page and analyze it (no video recording)
+      const analyzeContext = await this.browser.newContext({
+        viewport: { width, height },
+      });
+      const analyzePage_ = await analyzeContext.newPage();
+
+      await analyzePage_.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      });
+      await analyzePage_.waitForLoadState('networkidle').catch(() => {});
+
+      // Step 2: Analyze the page — extract all interactive elements + screenshot
+      this.onProgress({
+        status: 'parsing',
+        message: 'Analyzing page structure and elements...',
+      });
+
+      const analysis = await analyzePage(analyzePage_);
+      const pageContext = formatPageAnalysis(analysis);
+
+      console.log('Page analysis:\n', pageContext);
+      console.log(`Found ${analysis.elements.length} interactive elements`);
+
+      await analyzeContext.close();
+
+      // Step 3: Send page analysis + screenshot + instructions to Claude
+      this.onProgress({
+        status: 'parsing',
+        message: 'Interpreting your instructions with page context...',
+      });
+
+      const scenario = await parseInstructions(
+        url,
+        instructions,
+        this.apiKey,
+        pageContext,
+        analysis.screenshotBase64
+      );
       console.log(
         'Parsed actions:',
         JSON.stringify(scenario.actions, null, 2)
       );
 
-      // Step 2: Launch browser with video recording
+      // Step 4: Create recording context and execute actions
       this.onProgress({
         status: 'launching',
-        message: 'Launching browser...',
-      });
-
-      this.browser = await chromium.launch({
-        headless: true,
+        message: 'Starting video recording...',
       });
 
       this.context = await this.browser.newContext({

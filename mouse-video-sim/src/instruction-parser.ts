@@ -1,7 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { BrowserAction, ParsedScenario } from './types';
 
-const SYSTEM_PROMPT = `You are a browser automation interpreter. Given a starting URL and plain English instructions describing interactions with a webpage, you must output a JSON array of browser actions.
+const SYSTEM_PROMPT = `You are a browser automation interpreter. You are given:
+1. A starting URL
+2. Plain English instructions describing interactions with a webpage
+3. A detailed analysis of the ACTUAL page content — including every button, input, link, and their exact CSS selectors
+4. A screenshot of the page
+
+Your job is to convert the plain English instructions into a precise JSON array of browser actions, using the REAL selectors from the page analysis. Do NOT guess selectors — use the ones provided in the page analysis.
 
 Each action must be one of these types:
 - "click": Click on an element. Provide a CSS selector and a description.
@@ -12,11 +18,12 @@ Each action must be one of these types:
 - "navigate": Navigate to a URL. Provide the url.
 
 Guidelines:
+- ALWAYS use the exact CSS selectors from the page analysis when available. These are real, verified selectors from the live page.
 - Always add a "wait" action (1000-3000ms) after clicks that trigger page navigation or loading.
-- Use descriptive CSS selectors when possible (button text, aria labels, data attributes, IDs).
 - For ambiguous selectors, provide a clear "description" field so vision-based fallback can find the element.
 - Type actions should target specific input fields when possible.
 - Be generous with waits between actions (500-1000ms minimum) for realistic pacing.
+- Use the screenshot to understand the visual layout and match the user's descriptions to the correct elements.
 
 Respond with ONLY valid JSON — no markdown, no explanation. The format must be:
 {
@@ -30,9 +37,33 @@ Respond with ONLY valid JSON — no markdown, no explanation. The format must be
 export async function parseInstructions(
   url: string,
   instructions: string,
-  apiKey: string
+  apiKey: string,
+  pageAnalysis?: string,
+  screenshotBase64?: string
 ): Promise<ParsedScenario> {
   const client = new Anthropic({ apiKey });
+
+  // Build the user message content — include screenshot and page analysis if available
+  const userContent: Array<{ type: 'text'; text: string } | { type: 'image'; source: { type: 'base64'; media_type: 'image/png'; data: string } }> = [];
+
+  if (screenshotBase64) {
+    userContent.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: 'image/png',
+        data: screenshotBase64,
+      },
+    });
+  }
+
+  let textPrompt = `Starting URL: ${url}\n\n`;
+  if (pageAnalysis) {
+    textPrompt += `## Page Analysis (actual elements on the page):\n${pageAnalysis}\n\n`;
+  }
+  textPrompt += `## User Instructions:\n${instructions}`;
+
+  userContent.push({ type: 'text', text: textPrompt });
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
@@ -41,7 +72,7 @@ export async function parseInstructions(
     messages: [
       {
         role: 'user',
-        content: `Starting URL: ${url}\n\nInstructions:\n${instructions}`,
+        content: userContent,
       },
     ],
   });
