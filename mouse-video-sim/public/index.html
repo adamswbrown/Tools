@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mouse Video Simulator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #aaa;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #4287f5;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .dimensions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .dimensions input {
+      width: 100px;
+    }
+
+    .dimensions span {
+      color: #666;
+      font-size: 18px;
+    }
+
+    button {
+      background: #4287f5;
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    button:hover { background: #3470d4; }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 12px;
+      width: auto;
+      margin-top: 0;
+      border-radius: 6px;
+    }
+
+    .btn-secondary {
+      background: #333;
+    }
+    .btn-secondary:hover { background: #444; }
+
+    .btn-danger {
+      background: #6b2020;
+    }
+    .btn-danger:hover { background: #8b2020; }
+
+    .btn-success {
+      background: #2ea043;
+    }
+    .btn-success:hover { background: #278536; }
+
+    .progress-container {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-bar-track {
+      background: #1a1a1a;
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #4287f5;
+      border-radius: 6px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-status {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .progress-status.error {
+      color: #f54242;
+    }
+
+    .log-container {
+      margin-top: 16px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .log-entry {
+      color: #888;
+    }
+
+    .log-entry.current {
+      color: #4287f5;
+    }
+
+    .result-container {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    .download-btn {
+      background: #2ea043;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn:hover { background: #278536; }
+
+    .hint {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.6;
+    }
+
+    .hint code {
+      background: #252525;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    /* --- Collapsible panels --- */
+
+    .settings-toggle {
+      background: none;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 10px 16px;
+      font-size: 13px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 0;
+      margin-top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settings-toggle:hover {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    .settings-toggle .arrow {
+      transition: transform 0.2s;
+    }
+
+    .settings-toggle.open .arrow {
+      transform: rotate(90deg);
+    }
+
+    .settings-panel {
+      display: none;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .settings-panel.open {
+      display: block;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .slider-label label {
+      margin-bottom: 0;
+    }
+
+    .slider-value {
+      font-size: 13px;
+      color: #4287f5;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #333;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #4287f5;
+      cursor: pointer;
+    }
+
+    .slider-hint {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* --- Profile / Template section --- */
+
+    .profile-section {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .profile-section h3 {
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .profile-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .profile-row input, .profile-row select {
+      flex: 1;
+      margin: 0;
+    }
+
+    .profile-list {
+      margin-top: 8px;
+    }
+
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: #252525;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .profile-item .meta {
+      color: #666;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+
+    .profile-item-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .scan-urls {
+      width: 100%;
+      min-height: 60px;
+      padding: 8px 12px;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      resize: vertical;
+      margin-bottom: 8px;
+    }
+
+    .scan-urls:focus {
+      outline: none;
+      border-color: #4287f5;
+    }
+
+    .scan-status {
+      font-size: 12px;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .active-profile-badge {
+      display: inline-block;
+      background: #1a3d1a;
+      color: #2ea043;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    .scan-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    .scan-tab {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      width: auto;
+      margin-top: 0;
+      border-radius: 0;
+    }
+
+    .scan-tab:hover { color: #aaa; background: none; }
+
+    .scan-tab.active {
+      color: #4287f5;
+      border-bottom-color: #4287f5;
+      background: none;
+    }
+
+    .scan-tab-content {
+      display: none;
+    }
+
+    .scan-tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mouse Video Simulator</h1>
+    <p class="subtitle">Describe webpage interactions in plain English and get a realistic screen recording as MP4</p>
+
+    <div class="hint">
+      <strong>How it works:</strong> The tool loads your page first, analyzes every button, input, and link,
+      takes a screenshot, and sends all of that to Claude alongside your instructions. This means Claude
+      knows <em>exactly</em> what's on your page before generating mouse movements.
+      <br><br>
+      Just describe what you want in plain English, e.g.
+      <code>Click the "Sign In" button, wait for the login page to load, type "user@example.com" in the email field, then click "Submit"</code>.
+    </div>
+
+    <!-- Authentication Section -->
+    <div class="profile-section">
+      <h3>Authentication <span style="color:#666;font-weight:400;font-size:12px">— log in to scan and record protected pages</span></h3>
+
+      <div class="profile-row">
+        <select id="authSelect">
+          <option value="">No auth session (public pages only)</option>
+        </select>
+        <button type="button" class="btn-sm btn-danger" id="deleteAuthBtn" style="display:none" onclick="deleteSelectedAuth()">Delete</button>
+      </div>
+
+      <button type="button" class="settings-toggle" onclick="togglePanel('authPanel', this)" style="margin-bottom:0;border-radius:8px 8px 0 0">
+        Add Login Session <span class="arrow">&#9654;</span>
+      </button>
+      <div class="settings-panel" id="authPanel">
+        <div class="scan-tabs">
+          <button type="button" class="scan-tab" onclick="switchAuthTab('interactive')" id="tabInteractive">Interactive Login</button>
+          <button type="button" class="scan-tab" onclick="switchAuthTab('credentials')" id="tabCredentials">Stored Credentials</button>
+          <button type="button" class="scan-tab" onclick="switchAuthTab('cookies')" id="tabCookies">Cookie Import</button>
+        </div>
+
+        <!-- Interactive Login Tab -->
+        <div class="scan-tab-content" id="authTabInteractive">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Opens a visible browser window — log in manually, and the tool captures your session cookies automatically.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="interactiveName" placeholder="e.g. Dr Migrate Login" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Login Page URL</label>
+            <input type="text" id="interactiveUrl" placeholder="https://portal.drmigrate.com/login" style="padding:8px 12px">
+          </div>
+          <button type="button" class="btn-sm btn-success" id="interactiveBtn" onclick="startInteractiveLogin()">Open Browser &amp; Login</button>
+        </div>
+
+        <!-- Stored Credentials Tab -->
+        <div class="scan-tab-content" id="authTabCredentials">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Save login credentials for automated login. The tool fills and submits the form automatically.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="credName" placeholder="e.g. Dr Migrate Demo Account" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Login Page URL</label>
+            <input type="text" id="credLoginUrl" placeholder="https://portal.drmigrate.com/login" style="padding:8px 12px">
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex:1">
+              <label style="text-transform:none;letter-spacing:0;font-size:12px">Username / Email</label>
+              <input type="text" id="credUsername" placeholder="demo@drmigrate.com" style="padding:8px 12px">
+            </div>
+            <div style="flex:1">
+              <label style="text-transform:none;letter-spacing:0;font-size:12px">Password</label>
+              <input type="password" id="credPassword" placeholder="password" style="padding:8px 12px">
+            </div>
+          </div>
+          <button type="button" class="settings-toggle" onclick="togglePanel('credAdvanced', this)" style="margin-bottom:0;border-radius:6px;font-size:11px;padding:6px 12px">
+            Advanced: CSS Selectors <span class="arrow">&#9654;</span>
+          </button>
+          <div class="settings-panel" id="credAdvanced" style="padding:12px;border-radius:0 0 6px 6px;margin-bottom:8px">
+            <div class="slider-hint" style="margin-bottom:8px">Defaults work for most login forms. Override only if needed.</div>
+            <div style="margin-bottom:6px">
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Username Selector</label>
+              <input type="text" id="credUsernameSelector" placeholder='input[type="email"], input[name="email"]' style="padding:6px 10px;font-size:12px">
+            </div>
+            <div style="margin-bottom:6px">
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Password Selector</label>
+              <input type="text" id="credPasswordSelector" placeholder='input[type="password"]' style="padding:6px 10px;font-size:12px">
+            </div>
+            <div>
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Submit Button Selector</label>
+              <input type="text" id="credSubmitSelector" placeholder='button[type="submit"]' style="padding:6px 10px;font-size:12px">
+            </div>
+          </div>
+          <button type="button" class="btn-sm btn-secondary" id="credSaveBtn" onclick="saveStoredCredentials()">Save Credentials</button>
+          <button type="button" class="btn-sm btn-success" id="credLoginBtn" onclick="loginWithStoredCredentials()" style="display:none">Login Now</button>
+          <div id="credList" style="margin-top:8px"></div>
+        </div>
+
+        <!-- Cookie Import Tab -->
+        <div class="scan-tab-content" id="authTabCookies">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Export cookies from your browser (DevTools &gt; Application &gt; Cookies) and paste the JSON array here.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="cookieName" placeholder="e.g. Dr Migrate Session" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Domain</label>
+            <input type="text" id="cookieDomain" placeholder="portal.drmigrate.com" style="padding:8px 12px">
+          </div>
+          <label style="text-transform:none;letter-spacing:0;font-size:12px">Cookies JSON</label>
+          <textarea class="scan-urls" id="cookieJson" placeholder='[{"name": "session", "value": "abc123", "domain": ".drmigrate.com", "path": "/"}]' style="min-height:80px"></textarea>
+          <button type="button" class="btn-sm btn-success" onclick="importCookieSession()">Import Cookies</button>
+        </div>
+
+        <div class="scan-status" id="authStatus"></div>
+      </div>
+    </div>
+
+    <!-- Site Profiles Section -->
+    <div class="profile-section">
+      <h3>Site Profiles <span style="color:#666;font-weight:400;font-size:12px">— pre-scan your site for faster, more accurate runs</span></h3>
+
+      <div class="profile-row">
+        <select id="profileSelect">
+          <option value="">No profile (live scan each time)</option>
+        </select>
+        <button type="button" class="btn-sm btn-danger" id="deleteProfileBtn" style="display:none" onclick="deleteSelectedProfile()">Delete</button>
+      </div>
+
+      <button type="button" class="settings-toggle" onclick="togglePanel('scanPanel', this)" style="margin-bottom:0;border-radius:8px 8px 0 0">
+        Scan New Site <span class="arrow">&#9654;</span>
+      </button>
+      <div class="settings-panel" id="scanPanel">
+        <div style="margin-bottom:8px">
+          <label style="text-transform:none;letter-spacing:0;font-size:12px">Profile Name</label>
+          <input type="text" id="scanName" placeholder="e.g. Modernisation Planning Section" style="padding:8px 12px">
+        </div>
+
+        <div class="scan-tabs">
+          <button type="button" class="scan-tab" onclick="switchScanTab('crawl')" id="tabCrawl">Auto-Crawl</button>
+          <button type="button" class="scan-tab" onclick="switchScanTab('manual')" id="tabManual">Manual URLs</button>
+        </div>
+
+        <!-- Auto-Crawl Tab -->
+        <div class="scan-tab-content" id="scanTabCrawl">
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Starting URL</label>
+            <input type="text" id="crawlStartUrl" placeholder="https://example.com/modernisation/planning" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">
+              Path Scope <span style="color:#666">(only crawl pages under this path)</span>
+            </label>
+            <input type="text" id="crawlPathFilter" placeholder="Auto-detected from URL, e.g. /modernisation/planning/" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">
+              Max Pages <span style="color:#666">(limit how many pages to scan)</span>
+            </label>
+            <input type="text" id="crawlMaxPages" value="30" style="padding:8px 12px;width:80px">
+          </div>
+          <div class="slider-hint" style="margin-bottom:10px">
+            The crawler starts at your URL and follows every link within the path scope, building a complete map of that section.
+          </div>
+          <button type="button" class="btn-sm btn-success" id="crawlBtn" onclick="startCrawl()">Crawl &amp; Build Profile</button>
+        </div>
+
+        <!-- Manual URLs Tab -->
+        <div class="scan-tab-content" id="scanTabManual">
+          <label style="text-transform:none;letter-spacing:0;font-size:12px">URLs to scan (one per line)</label>
+          <textarea class="scan-urls" id="scanUrls" placeholder="https://example.com&#10;https://example.com/dashboard&#10;https://example.com/settings"></textarea>
+          <button type="button" class="btn-sm btn-success" id="scanBtn" onclick="startScan()">Scan Listed URLs</button>
+        </div>
+
+        <div class="scan-status" id="scanStatus"></div>
+      </div>
+    </div>
+
+    <!-- Prompt Templates Section -->
+    <div class="profile-section">
+      <h3>Prompt Templates <span style="color:#666;font-weight:400;font-size:12px">— save reusable page context descriptions</span></h3>
+
+      <div class="profile-row">
+        <select id="templateSelect">
+          <option value="">No template</option>
+        </select>
+        <button type="button" class="btn-sm btn-secondary" id="loadTemplateBtn" style="display:none" onclick="loadSelectedTemplate()">Load</button>
+        <button type="button" class="btn-sm btn-danger" id="deleteTemplateBtn" style="display:none" onclick="deleteSelectedTemplate()">Delete</button>
+      </div>
+
+      <div class="template-actions">
+        <input type="text" id="templateName" placeholder="Template name" style="flex:1;padding:8px 12px;font-size:12px">
+        <button type="button" class="btn-sm btn-success" onclick="saveCurrentTemplate()">Save Current Context</button>
+      </div>
+    </div>
+
+    <form id="simForm">
+      <div class="form-group">
+        <label>Target URL</label>
+        <input type="text" id="url" placeholder="https://example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Instructions</label>
+        <textarea id="instructions" placeholder="Describe the interactions you want to simulate...&#10;&#10;Example:&#10;Click the &quot;Login&quot; button in the top right corner.&#10;Wait for the login form to appear.&#10;Click on the email input field and type &quot;demo@example.com&quot;.&#10;Click on the password field and type &quot;password123&quot;.&#10;Click the &quot;Sign In&quot; button." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Additional Page Context <span style="color:#666;text-transform:none;letter-spacing:0">(optional — describe your UI for better accuracy)</span></label>
+        <textarea id="pageContext" style="min-height:80px" placeholder="Optional: Tell the AI about your interface...&#10;&#10;Example:&#10;This is the admin dashboard for our CRM. The sidebar has navigation links. The main area shows a data table with customer records. The &quot;New Customer&quot; button is a blue button in the top-right of the content area."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Viewport Size</label>
+        <div class="dimensions">
+          <input type="text" id="width" value="1280" placeholder="Width">
+          <span>&times;</span>
+          <input type="text" id="height" value="720" placeholder="Height">
+        </div>
+      </div>
+
+      <button type="button" class="settings-toggle" id="settingsToggle" onclick="togglePanel('settingsPanel', this)">
+        Mouse Settings <span class="arrow">&#9654;</span>
+      </button>
+      <div class="settings-panel" id="settingsPanel">
+        <div class="slider-group">
+          <div class="slider-label">
+            <label>Mouse Speed</label>
+            <span class="slider-value" id="speedValue">1.0x</span>
+          </div>
+          <input type="range" id="speed" min="0.2" max="3.0" step="0.1" value="1.0" oninput="updateSlider('speed', this.value + 'x')">
+          <div class="slider-hint">Slower = more deliberate, Faster = snappier movements</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <label>Path Curvature</label>
+            <span class="slider-value" id="curvatureValue">0.3</span>
+          </div>
+          <input type="range" id="curvature" min="0" max="1.0" step="0.05" value="0.3" oninput="updateSlider('curvature', this.value)">
+          <div class="slider-hint">0 = straight lines, 1.0 = wide sweeping arcs</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <label>Hand Jitter</label>
+            <span class="slider-value" id="jitterValue">0.3</span>
+          </div>
+          <input type="range" id="jitter" min="0" max="1.0" step="0.05" value="0.3" oninput="updateSlider('jitter', this.value)">
+          <div class="slider-hint">0 = perfectly smooth, 1.0 = shaky hand</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <label>Action Delay</label>
+            <span class="slider-value" id="actionDelayValue">500ms</span>
+          </div>
+          <input type="range" id="actionDelay" min="100" max="2000" step="50" value="500" oninput="updateSlider('actionDelay', this.value + 'ms')">
+          <div class="slider-hint">Pause between each action (click, scroll, etc.)</div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <label>Typing Speed</label>
+            <span class="slider-value" id="typingDelayValue">75ms</span>
+          </div>
+          <input type="range" id="typingDelay" min="20" max="200" step="5" value="75" oninput="updateSlider('typingDelay', this.value + 'ms')">
+          <div class="slider-hint">Delay per keystroke — lower = faster typing</div>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn">Generate Video</button>
+    </form>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="progress-status" id="progressStatus">Starting...</div>
+      <div class="log-container" id="logContainer"></div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <a id="downloadLink" href="#" download>
+        <button class="download-btn">Download MP4</button>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('simForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressStatus = document.getElementById('progressStatus');
+    const logContainer = document.getElementById('logContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const downloadLink = document.getElementById('downloadLink');
+
+    // --- Panel toggle ---
+    function togglePanel(panelId, btn) {
+      btn.classList.toggle('open');
+      document.getElementById(panelId).classList.toggle('open');
+    }
+
+    // --- Slider update ---
+    function updateSlider(id, display) {
+      document.getElementById(id + 'Value').textContent = display;
+    }
+
+    function getMouseConfig() {
+      return {
+        speed: parseFloat(document.getElementById('speed').value),
+        curvature: parseFloat(document.getElementById('curvature').value),
+        jitter: parseFloat(document.getElementById('jitter').value),
+        actionDelay: parseInt(document.getElementById('actionDelay').value),
+        typingDelay: parseInt(document.getElementById('typingDelay').value),
+      };
+    }
+
+    // --- Auth ---
+    const authSelect = document.getElementById('authSelect');
+    const deleteAuthBtn = document.getElementById('deleteAuthBtn');
+
+    authSelect.addEventListener('change', () => {
+      deleteAuthBtn.style.display = authSelect.value ? '' : 'none';
+    });
+
+    function switchAuthTab(tab) {
+      ['interactive', 'credentials', 'cookies'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+        document.getElementById('authTab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+      });
+    }
+    switchAuthTab('interactive');
+
+    async function loadAuthSessions() {
+      try {
+        const res = await fetch('/api/auth/sessions');
+        const sessions = await res.json();
+        while (authSelect.options.length > 1) authSelect.remove(1);
+        for (const s of sessions) {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = `${s.name} (${s.domain}, ${s.method})`;
+          authSelect.appendChild(opt);
+        }
+      } catch {}
+    }
+
+    async function startInteractiveLogin() {
+      const name = document.getElementById('interactiveName').value.trim();
+      const loginUrl = document.getElementById('interactiveUrl').value.trim();
+      if (!name || !loginUrl) { alert('Enter a session name and login URL.'); return; }
+
+      const btn = document.getElementById('interactiveBtn');
+      const status = document.getElementById('authStatus');
+      btn.disabled = true;
+      status.textContent = 'Opening browser — please log in...';
+
+      try {
+        const response = await fetch('/api/auth/interactive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginUrl, name }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') status.textContent = data.message;
+              else if (data.type === 'done') {
+                status.textContent = `Session "${data.session.name}" saved (${data.session.cookieCount} cookies).`;
+                document.getElementById('interactiveName').value = '';
+                document.getElementById('interactiveUrl').value = '';
+                await loadAuthSessions();
+                authSelect.value = data.session.id;
+                authSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') status.textContent = 'Error: ' + data.message;
+            } catch {}
+          }
+        }
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function saveStoredCredentials() {
+      const name = document.getElementById('credName').value.trim();
+      const loginUrl = document.getElementById('credLoginUrl').value.trim();
+      const username = document.getElementById('credUsername').value.trim();
+      const password = document.getElementById('credPassword').value;
+      if (!name || !loginUrl || !username || !password) { alert('Fill in all credential fields.'); return; }
+
+      const body = { name, loginUrl, username, password,
+        usernameSelector: document.getElementById('credUsernameSelector').value.trim() || undefined,
+        passwordSelector: document.getElementById('credPasswordSelector').value.trim() || undefined,
+        submitSelector: document.getElementById('credSubmitSelector').value.trim() || undefined,
+      };
+
+      try {
+        const res = await fetch('/api/auth/credentials', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        const creds = await res.json();
+        document.getElementById('authStatus').textContent = `Credentials "${creds.name}" saved. Click "Login Now" to create a session.`;
+        await loadCredentialsList();
+      } catch (err) {
+        document.getElementById('authStatus').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function loadCredentialsList() {
+      try {
+        const res = await fetch('/api/auth/credentials');
+        const creds = await res.json();
+        const list = document.getElementById('credList');
+        list.innerHTML = '';
+        for (const c of creds) {
+          const item = document.createElement('div');
+          item.className = 'profile-item';
+          item.innerHTML = `<span>${c.name} <span class="meta">${c.domain}</span></span>
+            <span class="profile-item-actions">
+              <button class="btn-sm btn-success" onclick="loginWithCreds('${c.id}')">Login</button>
+              <button class="btn-sm btn-danger" onclick="deleteCreds('${c.id}')">Delete</button>
+            </span>`;
+          list.appendChild(item);
+        }
+      } catch {}
+    }
+
+    async function loginWithCreds(id) {
+      const status = document.getElementById('authStatus');
+      status.textContent = 'Logging in...';
+      try {
+        const response = await fetch(`/api/auth/credentials/${id}/login`, { method: 'POST' });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') status.textContent = data.message;
+              else if (data.type === 'done') {
+                status.textContent = `Session "${data.session.name}" saved (${data.session.cookieCount} cookies).`;
+                await loadAuthSessions();
+                authSelect.value = data.session.id;
+                authSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') status.textContent = 'Error: ' + data.message;
+            } catch {}
+          }
+        }
+      } catch (err) { status.textContent = 'Error: ' + err.message; }
+    }
+
+    async function deleteCreds(id) {
+      if (!confirm('Delete these credentials?')) return;
+      await fetch(`/api/auth/credentials/${id}`, { method: 'DELETE' });
+      await loadCredentialsList();
+    }
+
+    async function importCookieSession() {
+      const name = document.getElementById('cookieName').value.trim();
+      const domain = document.getElementById('cookieDomain').value.trim();
+      const json = document.getElementById('cookieJson').value.trim();
+      if (!name || !domain || !json) { alert('Fill in all fields.'); return; }
+
+      try {
+        const cookies = JSON.parse(json);
+        const res = await fetch('/api/auth/cookies', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, domain, cookies }),
+        });
+        const result = await res.json();
+        document.getElementById('authStatus').textContent = `Session "${result.name}" saved (${result.cookieCount} cookies).`;
+        document.getElementById('cookieName').value = '';
+        document.getElementById('cookieJson').value = '';
+        await loadAuthSessions();
+        authSelect.value = result.id;
+        authSelect.dispatchEvent(new Event('change'));
+      } catch (err) {
+        document.getElementById('authStatus').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function deleteSelectedAuth() {
+      const id = authSelect.value;
+      if (!id || !confirm('Delete this session?')) return;
+      await fetch(`/api/auth/sessions/${id}`, { method: 'DELETE' });
+      await loadAuthSessions();
+      deleteAuthBtn.style.display = 'none';
+    }
+
+    // --- Scan tab switching ---
+    function switchScanTab(tab) {
+      document.getElementById('tabCrawl').classList.toggle('active', tab === 'crawl');
+      document.getElementById('tabManual').classList.toggle('active', tab === 'manual');
+      document.getElementById('scanTabCrawl').classList.toggle('active', tab === 'crawl');
+      document.getElementById('scanTabManual').classList.toggle('active', tab === 'manual');
+    }
+    // Default to crawl tab
+    switchScanTab('crawl');
+
+    // --- Profiles ---
+    const profileSelect = document.getElementById('profileSelect');
+    const deleteProfileBtn = document.getElementById('deleteProfileBtn');
+
+    profileSelect.addEventListener('change', () => {
+      deleteProfileBtn.style.display = profileSelect.value ? '' : 'none';
+    });
+
+    async function loadProfiles() {
+      try {
+        const res = await fetch('/api/profiles');
+        const profiles = await res.json();
+        // Keep first option, remove the rest
+        while (profileSelect.options.length > 1) profileSelect.remove(1);
+        for (const p of profiles) {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.name} (${p.pageCount} page${p.pageCount !== 1 ? 's' : ''})`;
+          profileSelect.appendChild(opt);
+        }
+      } catch {}
+    }
+
+    async function startScan() {
+      const name = document.getElementById('scanName').value.trim();
+      const urlsRaw = document.getElementById('scanUrls').value.trim();
+      if (!name || !urlsRaw) { alert('Enter a profile name and at least one URL.'); return; }
+
+      const urls = urlsRaw.split('\n').map(u => u.trim()).filter(u => u);
+      if (urls.length === 0) return;
+
+      const scanBtn = document.getElementById('scanBtn');
+      const scanStatus = document.getElementById('scanStatus');
+      scanBtn.disabled = true;
+      scanStatus.textContent = 'Starting scan...';
+
+      try {
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls, name, authSessionId: authSelect.value || undefined }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') {
+                scanStatus.textContent = data.message;
+              } else if (data.type === 'done') {
+                scanStatus.textContent = `Profile "${data.profile.name}" saved (${data.profile.pageCount} pages).`;
+                document.getElementById('scanName').value = '';
+                document.getElementById('scanUrls').value = '';
+                await loadProfiles();
+                // Auto-select the new profile
+                profileSelect.value = data.profile.id;
+                profileSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') {
+                scanStatus.textContent = 'Error: ' + data.message;
+              }
+            } catch {}
+          }
+        }
+      } catch (err) {
+        scanStatus.textContent = 'Error: ' + err.message;
+      } finally {
+        scanBtn.disabled = false;
+      }
+    }
+
+    async function startCrawl() {
+      const name = document.getElementById('scanName').value.trim();
+      const startUrl = document.getElementById('crawlStartUrl').value.trim();
+      if (!name || !startUrl) { alert('Enter a profile name and starting URL.'); return; }
+
+      const pathFilter = document.getElementById('crawlPathFilter').value.trim() || undefined;
+      const maxPages = parseInt(document.getElementById('crawlMaxPages').value) || 30;
+
+      const crawlBtn = document.getElementById('crawlBtn');
+      const scanStatus = document.getElementById('scanStatus');
+      crawlBtn.disabled = true;
+      scanStatus.textContent = 'Starting crawl...';
+
+      try {
+        const response = await fetch('/api/crawl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ startUrl, name, pathFilter, maxPages, authSessionId: authSelect.value || undefined }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') {
+                scanStatus.textContent = data.message;
+              } else if (data.type === 'done') {
+                scanStatus.textContent = `Profile "${data.profile.name}" saved (${data.profile.pageCount} pages).`;
+                document.getElementById('scanName').value = '';
+                document.getElementById('crawlStartUrl').value = '';
+                document.getElementById('crawlPathFilter').value = '';
+                await loadProfiles();
+                profileSelect.value = data.profile.id;
+                profileSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') {
+                scanStatus.textContent = 'Error: ' + data.message;
+              }
+            } catch {}
+          }
+        }
+      } catch (err) {
+        scanStatus.textContent = 'Error: ' + err.message;
+      } finally {
+        crawlBtn.disabled = false;
+      }
+    }
+
+    async function deleteSelectedProfile() {
+      const id = profileSelect.value;
+      if (!id) return;
+      if (!confirm('Delete this profile?')) return;
+      await fetch(`/api/profiles/${id}`, { method: 'DELETE' });
+      await loadProfiles();
+      deleteProfileBtn.style.display = 'none';
+    }
+
+    // --- Templates ---
+    const templateSelect = document.getElementById('templateSelect');
+    const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+    const deleteTemplateBtn = document.getElementById('deleteTemplateBtn');
+
+    templateSelect.addEventListener('change', () => {
+      const show = templateSelect.value ? '' : 'none';
+      loadTemplateBtn.style.display = show;
+      deleteTemplateBtn.style.display = show;
+    });
+
+    async function loadTemplates() {
+      try {
+        const res = await fetch('/api/templates');
+        const templates = await res.json();
+        while (templateSelect.options.length > 1) templateSelect.remove(1);
+        for (const t of templates) {
+          const opt = document.createElement('option');
+          opt.value = t.id;
+          opt.textContent = t.name;
+          templateSelect.appendChild(opt);
+        }
+      } catch {}
+    }
+
+    async function loadSelectedTemplate() {
+      const id = templateSelect.value;
+      if (!id) return;
+      try {
+        const res = await fetch(`/api/templates/${id}`);
+        const template = await res.json();
+        document.getElementById('pageContext').value = template.context;
+      } catch {}
+    }
+
+    async function saveCurrentTemplate() {
+      const name = document.getElementById('templateName').value.trim();
+      const context = document.getElementById('pageContext').value.trim();
+      if (!name || !context) { alert('Enter a template name and fill in the page context field.'); return; }
+
+      try {
+        await fetch('/api/templates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, context }),
+        });
+        document.getElementById('templateName').value = '';
+        await loadTemplates();
+      } catch (err) {
+        alert('Failed to save template: ' + err.message);
+      }
+    }
+
+    async function deleteSelectedTemplate() {
+      const id = templateSelect.value;
+      if (!id) return;
+      if (!confirm('Delete this template?')) return;
+      await fetch(`/api/templates/${id}`, { method: 'DELETE' });
+      await loadTemplates();
+      loadTemplateBtn.style.display = 'none';
+      deleteTemplateBtn.style.display = 'none';
+    }
+
+    // --- Main form submit ---
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const url = document.getElementById('url').value.trim();
+      const instructions = document.getElementById('instructions').value.trim();
+      const pageContext = document.getElementById('pageContext').value.trim();
+      const width = parseInt(document.getElementById('width').value) || 1280;
+      const height = parseInt(document.getElementById('height').value) || 720;
+      const mouseConfig = getMouseConfig();
+      const profileId = profileSelect.value || undefined;
+
+      if (!url || !instructions) return;
+
+      // Reset UI
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating...';
+      progressContainer.classList.add('active');
+      resultContainer.classList.remove('active');
+      logContainer.innerHTML = '';
+      progressBar.style.width = '0%';
+
+      try {
+        const response = await fetch('/api/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, instructions, pageContext, width, height, mouseConfig, profileId, authSessionId: authSelect.value || undefined }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Simulation failed');
+        }
+
+        // Stream progress updates via SSE-like response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+
+              if (data.type === 'progress') {
+                updateProgress(data);
+              } else if (data.type === 'done') {
+                progressBar.style.width = '100%';
+                progressStatus.textContent = 'Video ready!';
+                resultContainer.classList.add('active');
+                downloadLink.href = data.downloadUrl;
+              } else if (data.type === 'error') {
+                throw new Error(data.message);
+              }
+            } catch (parseErr) {
+              if (parseErr.message && !parseErr.message.includes('JSON')) {
+                throw parseErr;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        progressStatus.textContent = err.message;
+        progressStatus.classList.add('error');
+        addLog('Error: ' + err.message, true);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate Video';
+      }
+    });
+
+    function updateProgress(data) {
+      const { status, message, currentAction, totalActions } = data;
+
+      progressStatus.textContent = message;
+      progressStatus.classList.remove('error');
+
+      // Calculate progress percentage
+      let percent = 0;
+      switch (status) {
+        case 'parsing': percent = 10; break;
+        case 'launching': percent = 20; break;
+        case 'executing':
+          if (currentAction && totalActions) {
+            percent = 20 + (currentAction / totalActions) * 60;
+          } else {
+            percent = 30;
+          }
+          break;
+        case 'encoding': percent = 85; break;
+        case 'done': percent = 100; break;
+      }
+
+      progressBar.style.width = percent + '%';
+      addLog(message);
+    }
+
+    function addLog(message, isError = false) {
+      // Remove 'current' class from previous entries
+      logContainer.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+
+      const entry = document.createElement('div');
+      entry.className = 'log-entry' + (isError ? ' error' : ' current');
+      entry.textContent = message;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // Load profiles and templates on page load
+    loadAuthSessions();
+    loadCredentialsList();
+    loadProfiles();
+    loadTemplates();
+  </script>
+</body>
+</html>
