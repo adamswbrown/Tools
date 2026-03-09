@@ -4,6 +4,7 @@ import fs from 'fs';
 import { Simulator } from './simulator';
 import {
   scanSite,
+  crawlSite,
   listProfiles,
   loadProfile,
   deleteProfile,
@@ -40,6 +41,31 @@ app.post('/api/scan', async (req, res) => {
 
   try {
     const profile = await scanSite(urls, name, (msg) => {
+      try { res.write(JSON.stringify({ type: 'progress', message: msg }) + '\n'); } catch {}
+    });
+
+    res.write(JSON.stringify({ type: 'done', profile: { id: profile.id, name: profile.name, pageCount: profile.pages.length } }) + '\n');
+    res.end();
+  } catch (error) {
+    res.write(JSON.stringify({ type: 'error', message: (error as Error).message }) + '\n');
+    res.end();
+  }
+});
+
+app.post('/api/crawl', async (req, res) => {
+  const { startUrl, name, pathFilter, maxPages } = req.body;
+
+  if (!startUrl || !name) {
+    res.status(400).json({ error: 'Missing required fields: startUrl, name' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'application/x-ndjson');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  res.setHeader('Cache-Control', 'no-cache');
+
+  try {
+    const profile = await crawlSite(startUrl, name, { pathFilter, maxPages: maxPages || 50 }, (msg) => {
       try { res.write(JSON.stringify({ type: 'progress', message: msg }) + '\n'); } catch {}
     });
 

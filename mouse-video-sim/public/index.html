@@ -419,6 +419,44 @@
       border-radius: 4px;
       margin-left: 8px;
     }
+
+    .scan-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    .scan-tab {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      width: auto;
+      margin-top: 0;
+      border-radius: 0;
+    }
+
+    .scan-tab:hover { color: #aaa; background: none; }
+
+    .scan-tab.active {
+      color: #4287f5;
+      border-bottom-color: #4287f5;
+      background: none;
+    }
+
+    .scan-tab-content {
+      display: none;
+    }
+
+    .scan-tab-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -452,11 +490,45 @@
       <div class="settings-panel" id="scanPanel">
         <div style="margin-bottom:8px">
           <label style="text-transform:none;letter-spacing:0;font-size:12px">Profile Name</label>
-          <input type="text" id="scanName" placeholder="e.g. My Dashboard" style="padding:8px 12px">
+          <input type="text" id="scanName" placeholder="e.g. Modernisation Planning Section" style="padding:8px 12px">
         </div>
-        <label style="text-transform:none;letter-spacing:0;font-size:12px">URLs to scan (one per line)</label>
-        <textarea class="scan-urls" id="scanUrls" placeholder="https://example.com&#10;https://example.com/dashboard&#10;https://example.com/settings"></textarea>
-        <button type="button" class="btn-sm btn-success" id="scanBtn" onclick="startScan()">Scan Site</button>
+
+        <div class="scan-tabs">
+          <button type="button" class="scan-tab" onclick="switchScanTab('crawl')" id="tabCrawl">Auto-Crawl</button>
+          <button type="button" class="scan-tab" onclick="switchScanTab('manual')" id="tabManual">Manual URLs</button>
+        </div>
+
+        <!-- Auto-Crawl Tab -->
+        <div class="scan-tab-content" id="scanTabCrawl">
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Starting URL</label>
+            <input type="text" id="crawlStartUrl" placeholder="https://example.com/modernisation/planning" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">
+              Path Scope <span style="color:#666">(only crawl pages under this path)</span>
+            </label>
+            <input type="text" id="crawlPathFilter" placeholder="Auto-detected from URL, e.g. /modernisation/planning/" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">
+              Max Pages <span style="color:#666">(limit how many pages to scan)</span>
+            </label>
+            <input type="text" id="crawlMaxPages" value="30" style="padding:8px 12px;width:80px">
+          </div>
+          <div class="slider-hint" style="margin-bottom:10px">
+            The crawler starts at your URL and follows every link within the path scope, building a complete map of that section.
+          </div>
+          <button type="button" class="btn-sm btn-success" id="crawlBtn" onclick="startCrawl()">Crawl &amp; Build Profile</button>
+        </div>
+
+        <!-- Manual URLs Tab -->
+        <div class="scan-tab-content" id="scanTabManual">
+          <label style="text-transform:none;letter-spacing:0;font-size:12px">URLs to scan (one per line)</label>
+          <textarea class="scan-urls" id="scanUrls" placeholder="https://example.com&#10;https://example.com/dashboard&#10;https://example.com/settings"></textarea>
+          <button type="button" class="btn-sm btn-success" id="scanBtn" onclick="startScan()">Scan Listed URLs</button>
+        </div>
+
         <div class="scan-status" id="scanStatus"></div>
       </div>
     </div>
@@ -603,6 +675,16 @@
       };
     }
 
+    // --- Scan tab switching ---
+    function switchScanTab(tab) {
+      document.getElementById('tabCrawl').classList.toggle('active', tab === 'crawl');
+      document.getElementById('tabManual').classList.toggle('active', tab === 'manual');
+      document.getElementById('scanTabCrawl').classList.toggle('active', tab === 'crawl');
+      document.getElementById('scanTabManual').classList.toggle('active', tab === 'manual');
+    }
+    // Default to crawl tab
+    switchScanTab('crawl');
+
     // --- Profiles ---
     const profileSelect = document.getElementById('profileSelect');
     const deleteProfileBtn = document.getElementById('deleteProfileBtn');
@@ -680,6 +762,63 @@
         scanStatus.textContent = 'Error: ' + err.message;
       } finally {
         scanBtn.disabled = false;
+      }
+    }
+
+    async function startCrawl() {
+      const name = document.getElementById('scanName').value.trim();
+      const startUrl = document.getElementById('crawlStartUrl').value.trim();
+      if (!name || !startUrl) { alert('Enter a profile name and starting URL.'); return; }
+
+      const pathFilter = document.getElementById('crawlPathFilter').value.trim() || undefined;
+      const maxPages = parseInt(document.getElementById('crawlMaxPages').value) || 30;
+
+      const crawlBtn = document.getElementById('crawlBtn');
+      const scanStatus = document.getElementById('scanStatus');
+      crawlBtn.disabled = true;
+      scanStatus.textContent = 'Starting crawl...';
+
+      try {
+        const response = await fetch('/api/crawl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ startUrl, name, pathFilter, maxPages }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') {
+                scanStatus.textContent = data.message;
+              } else if (data.type === 'done') {
+                scanStatus.textContent = `Profile "${data.profile.name}" saved (${data.profile.pageCount} pages).`;
+                document.getElementById('scanName').value = '';
+                document.getElementById('crawlStartUrl').value = '';
+                document.getElementById('crawlPathFilter').value = '';
+                await loadProfiles();
+                profileSelect.value = data.profile.id;
+                profileSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') {
+                scanStatus.textContent = 'Error: ' + data.message;
+              }
+            } catch {}
+          }
+        }
+      } catch (err) {
+        scanStatus.textContent = 'Error: ' + err.message;
+      } finally {
+        crawlBtn.disabled = false;
       }
     }
 
