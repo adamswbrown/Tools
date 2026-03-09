@@ -473,6 +473,111 @@
       <code>Click the "Sign In" button, wait for the login page to load, type "user@example.com" in the email field, then click "Submit"</code>.
     </div>
 
+    <!-- Authentication Section -->
+    <div class="profile-section">
+      <h3>Authentication <span style="color:#666;font-weight:400;font-size:12px">— log in to scan and record protected pages</span></h3>
+
+      <div class="profile-row">
+        <select id="authSelect">
+          <option value="">No auth session (public pages only)</option>
+        </select>
+        <button type="button" class="btn-sm btn-danger" id="deleteAuthBtn" style="display:none" onclick="deleteSelectedAuth()">Delete</button>
+      </div>
+
+      <button type="button" class="settings-toggle" onclick="togglePanel('authPanel', this)" style="margin-bottom:0;border-radius:8px 8px 0 0">
+        Add Login Session <span class="arrow">&#9654;</span>
+      </button>
+      <div class="settings-panel" id="authPanel">
+        <div class="scan-tabs">
+          <button type="button" class="scan-tab" onclick="switchAuthTab('interactive')" id="tabInteractive">Interactive Login</button>
+          <button type="button" class="scan-tab" onclick="switchAuthTab('credentials')" id="tabCredentials">Stored Credentials</button>
+          <button type="button" class="scan-tab" onclick="switchAuthTab('cookies')" id="tabCookies">Cookie Import</button>
+        </div>
+
+        <!-- Interactive Login Tab -->
+        <div class="scan-tab-content" id="authTabInteractive">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Opens a visible browser window — log in manually, and the tool captures your session cookies automatically.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="interactiveName" placeholder="e.g. Dr Migrate Login" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Login Page URL</label>
+            <input type="text" id="interactiveUrl" placeholder="https://portal.drmigrate.com/login" style="padding:8px 12px">
+          </div>
+          <button type="button" class="btn-sm btn-success" id="interactiveBtn" onclick="startInteractiveLogin()">Open Browser &amp; Login</button>
+        </div>
+
+        <!-- Stored Credentials Tab -->
+        <div class="scan-tab-content" id="authTabCredentials">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Save login credentials for automated login. The tool fills and submits the form automatically.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="credName" placeholder="e.g. Dr Migrate Demo Account" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Login Page URL</label>
+            <input type="text" id="credLoginUrl" placeholder="https://portal.drmigrate.com/login" style="padding:8px 12px">
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex:1">
+              <label style="text-transform:none;letter-spacing:0;font-size:12px">Username / Email</label>
+              <input type="text" id="credUsername" placeholder="demo@drmigrate.com" style="padding:8px 12px">
+            </div>
+            <div style="flex:1">
+              <label style="text-transform:none;letter-spacing:0;font-size:12px">Password</label>
+              <input type="password" id="credPassword" placeholder="password" style="padding:8px 12px">
+            </div>
+          </div>
+          <button type="button" class="settings-toggle" onclick="togglePanel('credAdvanced', this)" style="margin-bottom:0;border-radius:6px;font-size:11px;padding:6px 12px">
+            Advanced: CSS Selectors <span class="arrow">&#9654;</span>
+          </button>
+          <div class="settings-panel" id="credAdvanced" style="padding:12px;border-radius:0 0 6px 6px;margin-bottom:8px">
+            <div class="slider-hint" style="margin-bottom:8px">Defaults work for most login forms. Override only if needed.</div>
+            <div style="margin-bottom:6px">
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Username Selector</label>
+              <input type="text" id="credUsernameSelector" placeholder='input[type="email"], input[name="email"]' style="padding:6px 10px;font-size:12px">
+            </div>
+            <div style="margin-bottom:6px">
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Password Selector</label>
+              <input type="text" id="credPasswordSelector" placeholder='input[type="password"]' style="padding:6px 10px;font-size:12px">
+            </div>
+            <div>
+              <label style="text-transform:none;letter-spacing:0;font-size:11px">Submit Button Selector</label>
+              <input type="text" id="credSubmitSelector" placeholder='button[type="submit"]' style="padding:6px 10px;font-size:12px">
+            </div>
+          </div>
+          <button type="button" class="btn-sm btn-secondary" id="credSaveBtn" onclick="saveStoredCredentials()">Save Credentials</button>
+          <button type="button" class="btn-sm btn-success" id="credLoginBtn" onclick="loginWithStoredCredentials()" style="display:none">Login Now</button>
+          <div id="credList" style="margin-top:8px"></div>
+        </div>
+
+        <!-- Cookie Import Tab -->
+        <div class="scan-tab-content" id="authTabCookies">
+          <div class="slider-hint" style="margin-bottom:10px">
+            Export cookies from your browser (DevTools &gt; Application &gt; Cookies) and paste the JSON array here.
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Session Name</label>
+            <input type="text" id="cookieName" placeholder="e.g. Dr Migrate Session" style="padding:8px 12px">
+          </div>
+          <div style="margin-bottom:8px">
+            <label style="text-transform:none;letter-spacing:0;font-size:12px">Domain</label>
+            <input type="text" id="cookieDomain" placeholder="portal.drmigrate.com" style="padding:8px 12px">
+          </div>
+          <label style="text-transform:none;letter-spacing:0;font-size:12px">Cookies JSON</label>
+          <textarea class="scan-urls" id="cookieJson" placeholder='[{"name": "session", "value": "abc123", "domain": ".drmigrate.com", "path": "/"}]' style="min-height:80px"></textarea>
+          <button type="button" class="btn-sm btn-success" onclick="importCookieSession()">Import Cookies</button>
+        </div>
+
+        <div class="scan-status" id="authStatus"></div>
+      </div>
+    </div>
+
     <!-- Site Profiles Section -->
     <div class="profile-section">
       <h3>Site Profiles <span style="color:#666;font-weight:400;font-size:12px">— pre-scan your site for faster, more accurate runs</span></h3>
@@ -675,6 +780,198 @@
       };
     }
 
+    // --- Auth ---
+    const authSelect = document.getElementById('authSelect');
+    const deleteAuthBtn = document.getElementById('deleteAuthBtn');
+
+    authSelect.addEventListener('change', () => {
+      deleteAuthBtn.style.display = authSelect.value ? '' : 'none';
+    });
+
+    function switchAuthTab(tab) {
+      ['interactive', 'credentials', 'cookies'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+        document.getElementById('authTab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+      });
+    }
+    switchAuthTab('interactive');
+
+    async function loadAuthSessions() {
+      try {
+        const res = await fetch('/api/auth/sessions');
+        const sessions = await res.json();
+        while (authSelect.options.length > 1) authSelect.remove(1);
+        for (const s of sessions) {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = `${s.name} (${s.domain}, ${s.method})`;
+          authSelect.appendChild(opt);
+        }
+      } catch {}
+    }
+
+    async function startInteractiveLogin() {
+      const name = document.getElementById('interactiveName').value.trim();
+      const loginUrl = document.getElementById('interactiveUrl').value.trim();
+      if (!name || !loginUrl) { alert('Enter a session name and login URL.'); return; }
+
+      const btn = document.getElementById('interactiveBtn');
+      const status = document.getElementById('authStatus');
+      btn.disabled = true;
+      status.textContent = 'Opening browser — please log in...';
+
+      try {
+        const response = await fetch('/api/auth/interactive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginUrl, name }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') status.textContent = data.message;
+              else if (data.type === 'done') {
+                status.textContent = `Session "${data.session.name}" saved (${data.session.cookieCount} cookies).`;
+                document.getElementById('interactiveName').value = '';
+                document.getElementById('interactiveUrl').value = '';
+                await loadAuthSessions();
+                authSelect.value = data.session.id;
+                authSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') status.textContent = 'Error: ' + data.message;
+            } catch {}
+          }
+        }
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function saveStoredCredentials() {
+      const name = document.getElementById('credName').value.trim();
+      const loginUrl = document.getElementById('credLoginUrl').value.trim();
+      const username = document.getElementById('credUsername').value.trim();
+      const password = document.getElementById('credPassword').value;
+      if (!name || !loginUrl || !username || !password) { alert('Fill in all credential fields.'); return; }
+
+      const body = { name, loginUrl, username, password,
+        usernameSelector: document.getElementById('credUsernameSelector').value.trim() || undefined,
+        passwordSelector: document.getElementById('credPasswordSelector').value.trim() || undefined,
+        submitSelector: document.getElementById('credSubmitSelector').value.trim() || undefined,
+      };
+
+      try {
+        const res = await fetch('/api/auth/credentials', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        const creds = await res.json();
+        document.getElementById('authStatus').textContent = `Credentials "${creds.name}" saved. Click "Login Now" to create a session.`;
+        await loadCredentialsList();
+      } catch (err) {
+        document.getElementById('authStatus').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function loadCredentialsList() {
+      try {
+        const res = await fetch('/api/auth/credentials');
+        const creds = await res.json();
+        const list = document.getElementById('credList');
+        list.innerHTML = '';
+        for (const c of creds) {
+          const item = document.createElement('div');
+          item.className = 'profile-item';
+          item.innerHTML = `<span>${c.name} <span class="meta">${c.domain}</span></span>
+            <span class="profile-item-actions">
+              <button class="btn-sm btn-success" onclick="loginWithCreds('${c.id}')">Login</button>
+              <button class="btn-sm btn-danger" onclick="deleteCreds('${c.id}')">Delete</button>
+            </span>`;
+          list.appendChild(item);
+        }
+      } catch {}
+    }
+
+    async function loginWithCreds(id) {
+      const status = document.getElementById('authStatus');
+      status.textContent = 'Logging in...';
+      try {
+        const response = await fetch(`/api/auth/credentials/${id}/login`, { method: 'POST' });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') status.textContent = data.message;
+              else if (data.type === 'done') {
+                status.textContent = `Session "${data.session.name}" saved (${data.session.cookieCount} cookies).`;
+                await loadAuthSessions();
+                authSelect.value = data.session.id;
+                authSelect.dispatchEvent(new Event('change'));
+              } else if (data.type === 'error') status.textContent = 'Error: ' + data.message;
+            } catch {}
+          }
+        }
+      } catch (err) { status.textContent = 'Error: ' + err.message; }
+    }
+
+    async function deleteCreds(id) {
+      if (!confirm('Delete these credentials?')) return;
+      await fetch(`/api/auth/credentials/${id}`, { method: 'DELETE' });
+      await loadCredentialsList();
+    }
+
+    async function importCookieSession() {
+      const name = document.getElementById('cookieName').value.trim();
+      const domain = document.getElementById('cookieDomain').value.trim();
+      const json = document.getElementById('cookieJson').value.trim();
+      if (!name || !domain || !json) { alert('Fill in all fields.'); return; }
+
+      try {
+        const cookies = JSON.parse(json);
+        const res = await fetch('/api/auth/cookies', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, domain, cookies }),
+        });
+        const result = await res.json();
+        document.getElementById('authStatus').textContent = `Session "${result.name}" saved (${result.cookieCount} cookies).`;
+        document.getElementById('cookieName').value = '';
+        document.getElementById('cookieJson').value = '';
+        await loadAuthSessions();
+        authSelect.value = result.id;
+        authSelect.dispatchEvent(new Event('change'));
+      } catch (err) {
+        document.getElementById('authStatus').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function deleteSelectedAuth() {
+      const id = authSelect.value;
+      if (!id || !confirm('Delete this session?')) return;
+      await fetch(`/api/auth/sessions/${id}`, { method: 'DELETE' });
+      await loadAuthSessions();
+      deleteAuthBtn.style.display = 'none';
+    }
+
     // --- Scan tab switching ---
     function switchScanTab(tab) {
       document.getElementById('tabCrawl').classList.toggle('active', tab === 'crawl');
@@ -725,7 +1022,7 @@
         const response = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urls, name }),
+          body: JSON.stringify({ urls, name, authSessionId: authSelect.value || undefined }),
         });
 
         const reader = response.body.getReader();
@@ -782,7 +1079,7 @@
         const response = await fetch('/api/crawl', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ startUrl, name, pathFilter, maxPages }),
+          body: JSON.stringify({ startUrl, name, pathFilter, maxPages, authSessionId: authSelect.value || undefined }),
         });
 
         const reader = response.body.getReader();
@@ -920,7 +1217,7 @@
         const response = await fetch('/api/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, instructions, pageContext, width, height, mouseConfig, profileId }),
+          body: JSON.stringify({ url, instructions, pageContext, width, height, mouseConfig, profileId, authSessionId: authSelect.value || undefined }),
         });
 
         if (!response.ok) {
@@ -1011,6 +1308,8 @@
     }
 
     // Load profiles and templates on page load
+    loadAuthSessions();
+    loadCredentialsList();
     loadProfiles();
     loadTemplates();
   </script>

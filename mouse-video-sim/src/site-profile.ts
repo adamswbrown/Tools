@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { chromium, Page } from 'playwright';
+import { chromium, Page, Cookie } from 'playwright';
 import { analyzePage, formatPageAnalysis, PageAnalysis } from './page-analyzer';
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -41,7 +41,8 @@ function profilePath(id: string): string {
 export async function scanSite(
   urls: string[],
   name: string,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
+  cookies?: Cookie[]
 ): Promise<SiteProfile> {
   ensureDirs();
   const log = onProgress || (() => {});
@@ -49,6 +50,11 @@ export async function scanSite(
   log('Launching browser...');
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+
+  if (cookies && cookies.length > 0) {
+    await context.addCookies(cookies);
+    log(`Injected ${cookies.length} auth cookies.`);
+  }
 
   const pages: PageSnapshot[] = [];
 
@@ -112,6 +118,7 @@ export async function crawlSite(
   options: {
     pathFilter?: string;
     maxPages?: number;
+    cookies?: Cookie[];
   } = {},
   onProgress?: (msg: string) => void
 ): Promise<SiteProfile> {
@@ -132,6 +139,11 @@ export async function crawlSite(
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+
+  if (options.cookies && options.cookies.length > 0) {
+    await context.addCookies(options.cookies);
+    log(`Injected ${options.cookies.length} auth cookies.`);
+  }
 
   const visited = new Set<string>();
   const queue: string[] = [startUrl];

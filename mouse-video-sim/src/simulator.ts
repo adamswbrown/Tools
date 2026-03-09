@@ -1,4 +1,4 @@
-import { chromium, Browser, Page, BrowserContext } from 'playwright';
+import { chromium, Browser, Page, BrowserContext, Cookie } from 'playwright';
 import * as path from 'path';
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,7 +36,8 @@ export class Simulator {
     instructions: string,
     width: number = 1280,
     height: number = 720,
-    hasProfileContext: boolean = false
+    hasProfileContext: boolean = false,
+    cookies?: Cookie[]
   ): Promise<string> {
     const jobId = uuidv4();
     const videoDir = path.join(OUTPUT_DIR, jobId);
@@ -71,6 +72,9 @@ export class Simulator {
         const analyzeContext = await this.browser.newContext({
           viewport: { width, height },
         });
+        if (cookies && cookies.length > 0) {
+          await analyzeContext.addCookies(cookies);
+        }
         const analyzePage_ = await analyzeContext.newPage();
 
         await analyzePage_.goto(url, {
@@ -125,6 +129,10 @@ export class Simulator {
           size: { width, height },
         },
       });
+
+      if (cookies && cookies.length > 0) {
+        await this.context.addCookies(cookies);
+      }
 
       this.page = await this.context.newPage();
 

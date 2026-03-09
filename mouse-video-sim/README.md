@@ -56,6 +56,54 @@ Then open **http://localhost:3456** in your browser.
 
 ---
 
+## Authentication (Login-Protected Sites)
+
+Most real apps require authentication. The tool supports three ways to handle this:
+
+### Option 1: Interactive Login (Recommended)
+
+The tool opens a **visible browser window** where you log in manually. Once authenticated, it captures your session cookies and reuses them for crawling and recording.
+
+1. Expand **"Add Login Session"** in the Authentication section
+2. Select the **"Interactive Login"** tab
+3. Enter a session name (e.g. "Dr Migrate Portal")
+4. Enter the login page URL (e.g. `https://portal.drmigrate.com/login`)
+5. Click **"Open Browser & Login"**
+6. A browser window opens — log in as you normally would
+7. Once the tool detects a successful login (URL change + auth cookies), it captures the session and closes the browser
+
+The session is now saved. Select it from the **auth dropdown** and all subsequent scans, crawls, and recordings will be authenticated.
+
+### Option 2: Stored Credentials
+
+For automated login without manual interaction:
+
+1. Select the **"Stored Credentials"** tab
+2. Enter the login URL, username, and password
+3. Click **"Save Credentials"**
+4. Click **"Login"** next to the saved credentials to generate a session
+
+The tool fills in the login form and submits it automatically. If your login form uses non-standard selectors, expand the **"Advanced: CSS Selectors"** panel to override them.
+
+### Option 3: Cookie Import
+
+If you have cookies from your browser:
+
+1. Open DevTools in your browser (F12 → Application → Cookies)
+2. Copy the cookies as JSON
+3. Select the **"Cookie Import"** tab
+4. Paste the JSON and click **"Import Cookies"**
+
+### Using Auth Sessions
+
+Once you have a session:
+- Select it from the **Authentication dropdown** at the top
+- It applies to **all operations**: scanning, crawling, and video recording
+- Sessions persist between restarts (saved in `data/auth/`)
+- If a session expires, just create a new one
+
+---
+
 ## Quick Start
 
 1. Open `http://localhost:3456`
@@ -118,9 +166,20 @@ Select a saved profile from the **dropdown** at the top of the Site Profiles sec
 
 Here's a real-world walkthrough using [Dr Migrate](https://portal.drmigrate.com) to demonstrate how you'd pre-train the tool on a multi-page platform.
 
+### Step 0: Authenticate
+
+Since the portal requires login:
+
+1. Expand **"Add Login Session"**
+2. Set session name: `Dr Migrate`
+3. Set login URL: `https://portal.drmigrate.com/login`
+4. Click **"Open Browser & Login"**
+5. Log in manually in the browser that opens
+6. The session is captured automatically — select it from the auth dropdown
+
 ### Step 1: Crawl the Platform
 
-Open the **"Scan New Site"** panel and fill in:
+With your auth session selected, open the **"Scan New Site"** panel and fill in:
 
 | Field | Value |
 |---|---|
