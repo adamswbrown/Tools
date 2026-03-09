@@ -18,16 +18,13 @@ export class Simulator {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
   private page: Page | null = null;
-  private apiKey: string;
   private cursorX = 0;
   private cursorY = 0;
   private onProgress: (progress: SimulationProgress) => void;
 
   constructor(
-    apiKey: string,
     onProgress?: (progress: SimulationProgress) => void
   ) {
-    this.apiKey = apiKey;
     this.onProgress = onProgress || (() => {});
   }
 
@@ -91,7 +88,6 @@ export class Simulator {
       const scenario = await parseInstructions(
         url,
         instructions,
-        this.apiKey,
         pageContext,
         analysis.screenshotBase64
       );
@@ -236,8 +232,7 @@ export class Simulator {
         const target = await findElement(
           this.page,
           action.selector,
-          action.description,
-          this.apiKey
+          action.description
         );
         await this.moveMouseTo(target.x, target.y, target.width);
         await this.page.evaluate(
@@ -252,8 +247,7 @@ export class Simulator {
         const hoverTarget = await findElement(
           this.page,
           action.selector,
-          action.description,
-          this.apiKey
+          action.description
         );
         await this.moveMouseTo(
           hoverTarget.x,
@@ -270,8 +264,7 @@ export class Simulator {
             const inputTarget = await findElement(
               this.page,
               action.selector,
-              action.description,
-              this.apiKey
+              action.description
             );
             await this.moveMouseTo(
               inputTarget.x,

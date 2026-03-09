@@ -15,8 +15,7 @@ interface FoundElement {
 export async function findElement(
   page: Page,
   selector: string | undefined,
-  description: string | undefined,
-  apiKey: string
+  description: string | undefined
 ): Promise<FoundElement> {
   // Strategy 1: Try CSS selector
   if (selector) {
@@ -120,7 +119,7 @@ export async function findElement(
   if (description) {
     const screenshot = await page.screenshot({ type: 'png' });
     const base64 = screenshot.toString('base64');
-    const result = await identifyElementByVision(base64, description, apiKey);
+    const result = await identifyElementByVision(base64, description);
     if (result) {
       return {
         x: result.x,

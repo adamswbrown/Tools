@@ -13,10 +13,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/output', express.static(path.join(__dirname, '..', 'output')));
 
 app.post('/api/simulate', async (req, res) => {
-  const { apiKey, url, instructions, pageContext, width, height } = req.body;
+  const { url, instructions, pageContext, width, height } = req.body;
 
-  if (!apiKey || !url || !instructions) {
-    res.status(400).json({ error: 'Missing required fields: apiKey, url, instructions' });
+  if (!url || !instructions) {
+    res.status(400).json({ error: 'Missing required fields: url, instructions' });
     return;
   }
 
@@ -32,7 +32,7 @@ app.post('/api/simulate', async (req, res) => {
   };
 
   try {
-    const simulator = new Simulator(apiKey, (progress) => {
+    const simulator = new Simulator((progress) => {
       sendProgress({ type: 'progress', ...progress });
     });
 

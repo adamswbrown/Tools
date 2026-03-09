@@ -1,5 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { BrowserAction, ParsedScenario } from './types';
+import { askClaude } from './claude-client';
 
 const SYSTEM_PROMPT = `You are a browser automation interpreter. You are given:
 1. A starting URL
@@ -37,48 +37,16 @@ Respond with ONLY valid JSON — no markdown, no explanation. The format must be
 export async function parseInstructions(
   url: string,
   instructions: string,
-  apiKey: string,
   pageAnalysis?: string,
   screenshotBase64?: string
 ): Promise<ParsedScenario> {
-  const client = new Anthropic({ apiKey });
-
-  // Build the user message content — include screenshot and page analysis if available
-  const userContent: Array<{ type: 'text'; text: string } | { type: 'image'; source: { type: 'base64'; media_type: 'image/png'; data: string } }> = [];
-
-  if (screenshotBase64) {
-    userContent.push({
-      type: 'image',
-      source: {
-        type: 'base64',
-        media_type: 'image/png',
-        data: screenshotBase64,
-      },
-    });
-  }
-
-  let textPrompt = `Starting URL: ${url}\n\n`;
+  let textPrompt = `${SYSTEM_PROMPT}\n\n---\n\nStarting URL: ${url}\n\n`;
   if (pageAnalysis) {
     textPrompt += `## Page Analysis (actual elements on the page):\n${pageAnalysis}\n\n`;
   }
-  textPrompt += `## User Instructions:\n${instructions}`;
+  textPrompt += `## User Instructions:\n${instructions}\n\nRespond with ONLY valid JSON.`;
 
-  userContent.push({ type: 'text', text: textPrompt });
-
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: userContent,
-      },
-    ],
-  });
-
-  const responseText =
-    message.content[0].type === 'text' ? message.content[0].text : '';
+  const responseText = askClaude(textPrompt);
 
   // Strip markdown code fences if present
   const cleaned = responseText
@@ -97,57 +65,16 @@ export async function parseInstructions(
 
 export async function identifyElementByVision(
   screenshotBase64: string,
-  description: string,
-  apiKey: string
+  description: string
 ): Promise<{ selector: string; x: number; y: number } | null> {
-  const client = new Anthropic({ apiKey });
-
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: 'image/png',
-              data: screenshotBase64,
-            },
-          },
-          {
-            type: 'text',
-            text: `Look at this screenshot of a webpage. I need to find the element described as: "${description}"
-
-Return ONLY a JSON object with the approximate x,y coordinates (in pixels from the top-left) of the CENTER of that element. The screenshot dimensions represent the actual viewport size.
-
-Format: {"x": 500, "y": 300, "found": true}
-
-If you cannot find the element, return: {"found": false}`,
-          },
-        ],
-      },
-    ],
-  });
-
-  const responseText =
-    message.content[0].type === 'text' ? message.content[0].text : '';
-
-  const cleaned = responseText
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/i, '')
-    .replace(/\s*```$/i, '')
-    .trim();
-
-  const result = JSON.parse(cleaned);
-
-  if (!result.found) return null;
-
-  return {
-    selector: `[vision-match="${description}"]`,
-    x: result.x,
-    y: result.y,
-  };
+  // Vision-based element detection using Claude CLI.
+  // Note: The CLI text-only mode cannot process images directly.
+  // This fallback provides a best-effort text prompt describing
+  // what we need, but without actual screenshot analysis it may not work.
+  // The primary CSS/text/role locator strategies should handle most cases.
+  console.warn(
+    `Vision fallback requested for "${description}" — CLI mode has limited vision support. ` +
+    `Relying on CSS/text/role locator strategies instead.`
+  );
+  return null;
 }

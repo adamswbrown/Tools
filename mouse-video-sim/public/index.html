@@ -261,11 +261,6 @@
 
     <form id="simForm">
       <div class="form-group">
-        <label>Anthropic API Key</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-..." required>
-      </div>
-
-      <div class="form-group">
         <label>Target URL</label>
         <input type="text" id="url" placeholder="https://example.com" required>
       </div>
@@ -317,23 +312,16 @@
     const resultContainer = document.getElementById('resultContainer');
     const downloadLink = document.getElementById('downloadLink');
 
-    // Persist API key
-    const savedKey = localStorage.getItem('mvs_api_key');
-    if (savedKey) document.getElementById('apiKey').value = savedKey;
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const apiKey = document.getElementById('apiKey').value.trim();
       const url = document.getElementById('url').value.trim();
       const instructions = document.getElementById('instructions').value.trim();
       const pageContext = document.getElementById('pageContext').value.trim();
       const width = parseInt(document.getElementById('width').value) || 1280;
       const height = parseInt(document.getElementById('height').value) || 720;
 
-      if (!apiKey || !url || !instructions) return;
-
-      localStorage.setItem('mvs_api_key', apiKey);
+      if (!url || !instructions) return;
 
       // Reset UI
       submitBtn.disabled = true;
@@ -347,7 +335,7 @@
         const response = await fetch('/api/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey, url, instructions, pageContext, width, height }),
+          body: JSON.stringify({ url, instructions, pageContext, width, height }),
         });
 
         if (!response.ok) {
