@@ -2,7 +2,7 @@ import { chromium, Browser, Page, BrowserContext } from 'playwright';
 import * as path from 'path';
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import { ParsedScenario, BrowserAction, SimulationProgress } from './types';
+import { ParsedScenario, BrowserAction, SimulationProgress, MouseConfig, DEFAULT_MOUSE_CONFIG } from './types';
 import { parseInstructions } from './instruction-parser';
 import { findElement } from './element-finder';
 import { analyzePage, formatPageAnalysis } from './page-analyzer';
@@ -21,11 +21,14 @@ export class Simulator {
   private cursorX = 0;
   private cursorY = 0;
   private onProgress: (progress: SimulationProgress) => void;
+  private mouseConfig: MouseConfig;
 
   constructor(
-    onProgress?: (progress: SimulationProgress) => void
+    onProgress?: (progress: SimulationProgress) => void,
+    mouseConfig?: Partial<MouseConfig>
   ) {
     this.onProgress = onProgress || (() => {});
+    this.mouseConfig = { ...DEFAULT_MOUSE_CONFIG, ...mouseConfig };
   }
 
   async run(
@@ -133,7 +136,7 @@ export class Simulator {
       // Small initial pause
       await this.sleep(1000);
 
-      // Step 3: Execute each action
+      // Execute each action
       for (let i = 0; i < scenario.actions.length; i++) {
         const action = scenario.actions[i];
         this.onProgress({
@@ -146,14 +149,15 @@ export class Simulator {
         await this.executeAction(action);
         await this.ensureCursor();
 
-        // Small pause between actions for realism
-        await this.sleep(300 + Math.random() * 400);
+        // Configurable pause between actions with some randomness
+        const baseDelay = this.mouseConfig.actionDelay;
+        await this.sleep(baseDelay * 0.6 + Math.random() * baseDelay * 0.8);
       }
 
       // Final pause at end
       await this.sleep(1500);
 
-      // Step 4: Close and get video
+      // Close and get video
       this.onProgress({
         status: 'encoding',
         message: 'Encoding video...',
@@ -278,10 +282,11 @@ export class Simulator {
           }
         }
         if (action.text) {
-          // Type character by character with random delays for realism
+          // Configurable typing speed with randomness
+          const baseDelay = this.mouseConfig.typingDelay;
           for (const char of action.text) {
             await this.page.keyboard.type(char, {
-              delay: 50 + Math.random() * 100,
+              delay: baseDelay * 0.6 + Math.random() * baseDelay * 0.8,
             });
           }
         }
@@ -311,16 +316,17 @@ export class Simulator {
       (targetX - this.cursorX) ** 2 + (targetY - this.cursorY) ** 2
     );
 
-    const path = generateBezierPath(
+    const movePath = generateBezierPath(
       this.cursorX,
       this.cursorY,
       targetX,
-      targetY
+      targetY,
+      this.mouseConfig
     );
-    const duration = calculateMoveDuration(distance, targetWidth);
-    const stepDelay = duration / path.length;
+    const duration = calculateMoveDuration(distance, targetWidth, this.mouseConfig.speed);
+    const stepDelay = duration / movePath.length;
 
-    for (const point of path) {
+    for (const point of movePath) {
       await this.page.mouse.move(point.x, point.y);
       await this.page.evaluate(
         `window.__moveSimCursor && window.__moveSimCursor(${point.x}, ${point.y})`

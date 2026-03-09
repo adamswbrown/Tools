@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/output', express.static(path.join(__dirname, '..', 'output')));
 
 app.post('/api/simulate', async (req, res) => {
-  const { url, instructions, pageContext, width, height } = req.body;
+  const { url, instructions, pageContext, width, height, mouseConfig } = req.body;
 
   if (!url || !instructions) {
     res.status(400).json({ error: 'Missing required fields: url, instructions' });
@@ -34,7 +34,7 @@ app.post('/api/simulate', async (req, res) => {
   try {
     const simulator = new Simulator((progress) => {
       sendProgress({ type: 'progress', ...progress });
-    });
+    }, mouseConfig);
 
     const fullInstructions = pageContext
       ? `Context about this UI: ${pageContext}\n\nSteps to perform:\n${instructions}`

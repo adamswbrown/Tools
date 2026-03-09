@@ -62,6 +62,8 @@ export const CURSOR_INJECT_SCRIPT = `
 })();
 `;
 
+import { MouseConfig, DEFAULT_MOUSE_CONFIG } from './types';
+
 /**
  * Generates points along a Bézier curve for realistic mouse movement.
  * Uses cubic Bézier with randomized control points.
@@ -71,15 +73,17 @@ export function generateBezierPath(
   startY: number,
   endX: number,
   endY: number,
-  steps: number = 50
+  config: MouseConfig = DEFAULT_MOUSE_CONFIG
 ): Array<{ x: number; y: number }> {
   const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
 
-  // More steps for longer distances
-  const actualSteps = Math.max(20, Math.min(80, Math.round(distance / 8)));
+  // More steps for longer distances; speed affects step density
+  const baseSteps = Math.round(distance / 8);
+  const actualSteps = Math.max(20, Math.min(80, Math.round(baseSteps / config.speed)));
 
   // Random control points for natural-looking curves
-  const spread = distance * 0.3;
+  // curvature (0–1) scales the spread of the control points
+  const spread = distance * config.curvature;
   const cp1x = startX + (endX - startX) * 0.25 + (Math.random() - 0.5) * spread;
   const cp1y = startY + (endY - startY) * 0.25 + (Math.random() - 0.5) * spread;
   const cp2x = startX + (endX - startX) * 0.75 + (Math.random() - 0.5) * spread;
@@ -108,11 +112,11 @@ export function generateBezierPath(
       3 * (1 - eased) * Math.pow(eased, 2) * cp2y +
       Math.pow(eased, 3) * endY;
 
-    // Add subtle jitter for realism
-    const jitter = Math.max(0.5, distance * 0.003);
+    // Add subtle jitter for realism; jitter (0–1) scales the tremor
+    const jitterAmount = Math.max(0.1, distance * 0.01 * config.jitter);
     points.push({
-      x: x + (Math.random() - 0.5) * jitter,
-      y: y + (Math.random() - 0.5) * jitter,
+      x: x + (Math.random() - 0.5) * jitterAmount,
+      y: y + (Math.random() - 0.5) * jitterAmount,
     });
   }
 
@@ -125,13 +129,15 @@ export function generateBezierPath(
 /**
  * Calculate movement duration using Fitts's Law approximation.
  * Longer distances and smaller targets take more time.
+ * Speed multiplier inversely scales the duration.
  */
 export function calculateMoveDuration(
   distance: number,
-  targetSize: number = 40
+  targetSize: number = 40,
+  speed: number = 1.0
 ): number {
   const a = 200; // base time ms
   const b = 150; // scaling factor
-  if (distance < 1) return a;
-  return Math.round(a + b * Math.log2(distance / targetSize + 1));
+  if (distance < 1) return Math.round(a / speed);
+  return Math.round((a + b * Math.log2(distance / targetSize + 1)) / speed);
 }

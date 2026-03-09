@@ -41,6 +41,27 @@ export interface SimulationProgress {
   message: string;
 }
 
+export interface MouseConfig {
+  /** Mouse movement speed: 0.1 (very slow) to 3.0 (very fast). Default 1.0 */
+  speed: number;
+  /** Bezier curve randomness: 0 (straight lines) to 1.0 (wild curves). Default 0.3 */
+  curvature: number;
+  /** Micro-jitter amount: 0 (perfectly smooth) to 1.0 (shaky). Default 0.3 */
+  jitter: number;
+  /** Delay between actions in ms. Default 500 */
+  actionDelay: number;
+  /** Typing speed: delay per character in ms. Default 75 */
+  typingDelay: number;
+}
+
+export const DEFAULT_MOUSE_CONFIG: MouseConfig = {
+  speed: 1.0,
+  curvature: 0.3,
+  jitter: 0.3,
+  actionDelay: 500,
+  typingDelay: 75,
+};
+
 export interface ElementMatch {
   selector: string;
   x: number;
