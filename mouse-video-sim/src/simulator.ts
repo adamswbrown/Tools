@@ -35,7 +35,8 @@ export class Simulator {
     url: string,
     instructions: string,
     width: number = 1280,
-    height: number = 720
+    height: number = 720,
+    hasProfileContext: boolean = false
   ): Promise<string> {
     const jobId = uuidv4();
     const videoDir = path.join(OUTPUT_DIR, jobId);
@@ -56,33 +57,45 @@ export class Simulator {
         headless: true,
       });
 
-      // First context: load the page and analyze it (no video recording)
-      const analyzeContext = await this.browser.newContext({
-        viewport: { width, height },
-      });
-      const analyzePage_ = await analyzeContext.newPage();
+      let pageContext: string | undefined;
+      let screenshotBase64: string | undefined;
 
-      await analyzePage_.goto(url, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      });
-      await analyzePage_.waitForLoadState('networkidle').catch(() => {});
+      if (hasProfileContext) {
+        // Profile context was already injected into instructions — skip live analysis
+        this.onProgress({
+          status: 'parsing',
+          message: 'Using saved site profile (skipping live scan)...',
+        });
+      } else {
+        // First context: load the page and analyze it (no video recording)
+        const analyzeContext = await this.browser.newContext({
+          viewport: { width, height },
+        });
+        const analyzePage_ = await analyzeContext.newPage();
 
-      // Step 2: Analyze the page — extract all interactive elements + screenshot
-      this.onProgress({
-        status: 'parsing',
-        message: 'Analyzing page structure and elements...',
-      });
+        await analyzePage_.goto(url, {
+          waitUntil: 'domcontentloaded',
+          timeout: 30000,
+        });
+        await analyzePage_.waitForLoadState('networkidle').catch(() => {});
 
-      const analysis = await analyzePage(analyzePage_);
-      const pageContext = formatPageAnalysis(analysis);
+        // Step 2: Analyze the page — extract all interactive elements + screenshot
+        this.onProgress({
+          status: 'parsing',
+          message: 'Analyzing page structure and elements...',
+        });
 
-      console.log('Page analysis:\n', pageContext);
-      console.log(`Found ${analysis.elements.length} interactive elements`);
+        const analysis = await analyzePage(analyzePage_);
+        pageContext = formatPageAnalysis(analysis);
+        screenshotBase64 = analysis.screenshotBase64;
 
-      await analyzeContext.close();
+        console.log('Page analysis:\n', pageContext);
+        console.log(`Found ${analysis.elements.length} interactive elements`);
 
-      // Step 3: Send page analysis + screenshot + instructions to Claude
+        await analyzeContext.close();
+      }
+
+      // Send page analysis + instructions to Claude
       this.onProgress({
         status: 'parsing',
         message: 'Interpreting your instructions with page context...',
@@ -92,7 +105,7 @@ export class Simulator {
         url,
         instructions,
         pageContext,
-        analysis.screenshotBase64
+        screenshotBase64
       );
       console.log(
         'Parsed actions:',
