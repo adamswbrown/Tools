@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Coffee Brewer</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B5E3C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Coffee">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <button class="nav-btn active" data-page="brew">Brew</button>
+            <button class="nav-btn" data-page="history">History</button>
+            <button class="nav-btn" data-page="settings">Settings</button>
+        </nav>
+
+        <!-- Brew Page -->
+        <div id="page-brew" class="page active">
+
+            <!-- Step 1: Method Selection -->
+            <div id="brew-method" class="brew-step active">
+                <header>
+                    <h1>Coffee Brewer</h1>
+                    <p class="subtitle">What are we brewing?</p>
+                </header>
+                <div class="method-cards">
+                    <button class="method-card" data-method="clever">
+                        <span class="method-icon">&#9749;</span>
+                        <div class="method-info">
+                            <strong>Clever Dripper</strong>
+                            <span>Immersion + filter &middot; 3 min steep</span>
+                        </div>
+                    </button>
+                    <button class="method-card" data-method="french">
+                        <span class="method-icon">&#127861;</span>
+                        <div class="method-info">
+                            <strong>French Press</strong>
+                            <span>Hoffmann method &middot; ~10 min</span>
+                        </div>
+                    </button>
+                    <button class="method-card" data-method="aromaboy">
+                        <span class="method-icon">&#9741;</span>
+                        <div class="method-info">
+                            <strong>Aromaboy</strong>
+                            <span>Filter drip machine</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: People Selection -->
+            <div id="brew-people" class="brew-step">
+                <header>
+                    <button class="back-btn" id="back-to-method">&larr; Back</button>
+                    <h2 id="people-method-name">Clever Dripper</h2>
+                    <p class="subtitle">How many people?</p>
+                </header>
+                <div class="people-cards">
+                    <button class="people-card" data-people="1">
+                        <span class="people-count">1</span>
+                        <span class="people-detail">18g coffee &middot; 300ml water</span>
+                    </button>
+                    <button class="people-card" data-people="2">
+                        <span class="people-count">2</span>
+                        <span class="people-detail">36g coffee &middot; 600ml water</span>
+                    </button>
+                    <button class="people-card" data-people="3">
+                        <span class="people-count">3</span>
+                        <span class="people-detail">54g coffee &middot; 900ml water</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Recipe -->
+            <div id="brew-recipe" class="brew-step">
+                <header>
+                    <button class="back-btn" id="back-to-people">&larr; Back</button>
+                    <h2 id="recipe-method-name">Clever Dripper</h2>
+                </header>
+                <div class="recipe-card">
+                    <div class="recipe-amounts">
+                        <div class="recipe-amount">
+                            <span class="amount-value" id="recipe-grind">19</span>
+                            <span class="amount-label">Grind (Encore)</span>
+                        </div>
+                        <div class="recipe-amount">
+                            <span class="amount-value" id="recipe-coffee">36g</span>
+                            <span class="amount-label">Coffee</span>
+                        </div>
+                        <div class="recipe-amount">
+                            <span class="amount-value" id="recipe-water">600ml</span>
+                            <span class="amount-label">Water</span>
+                        </div>
+                    </div>
+                    <ol class="recipe-steps" id="recipe-steps-list">
+                        <!-- Populated by JS -->
+                    </ol>
+                </div>
+                <button class="btn-primary" id="start-brewing">Start Brewing</button>
+            </div>
+
+            <!-- Step 4: Timer -->
+            <div id="brew-timer" class="brew-step">
+                <div class="timer-container">
+                    <p class="timer-step-label" id="timer-step-label">Steeping...</p>
+                    <div class="timer-display" id="timer-display">3:00</div>
+                    <div class="timer-progress" id="timer-progress"></div>
+                    <button class="btn-primary" id="timer-next-btn">Next Step</button>
+                    <button class="btn-secondary" id="timer-skip-btn">Skip Timer</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Taste Feedback -->
+            <div id="brew-feedback" class="brew-step">
+                <header>
+                    <h2>How did it taste?</h2>
+                    <p class="subtitle">This helps adjust your grind</p>
+                </header>
+                <div class="taste-cards">
+                    <button class="taste-card taste-sour" data-taste="sour">
+                        <span class="taste-emoji">&#128528;</span>
+                        <strong>Sour / Thin</strong>
+                        <span>Sharp, acidic, watery</span>
+                    </button>
+                    <button class="taste-card taste-balanced" data-taste="balanced">
+                        <span class="taste-emoji">&#128522;</span>
+                        <strong>Balanced / Sweet</strong>
+                        <span>Smooth, flavourful, just right</span>
+                    </button>
+                    <button class="taste-card taste-bitter" data-taste="bitter">
+                        <span class="taste-emoji">&#128556;</span>
+                        <strong>Bitter / Harsh</strong>
+                        <span>Dry, astringent, over-extracted</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 6: Result / Advice -->
+            <div id="brew-result" class="brew-step">
+                <div class="result-container">
+                    <div class="result-icon" id="result-icon">&#9989;</div>
+                    <h2 id="result-title">Brew Saved!</h2>
+                    <p class="result-message" id="result-message">Grind adjusted from 19 to 18</p>
+                    <div class="result-advice" id="result-advice">
+                        Try grinding one click finer next time.
+                    </div>
+                    <button class="btn-primary" id="finish-brew">Brew Again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="page-history" class="page">
+            <header>
+                <h1>Brew History</h1>
+                <p class="subtitle">Your recent brews</p>
+            </header>
+            <div id="history-list" class="history-list">
+                <p class="empty-state">No brews yet. Go make some coffee!</p>
+            </div>
+            <button class="btn-danger" id="clear-history" style="display:none;">Clear History</button>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="page-settings" class="page">
+            <header>
+                <h1>Grind Settings</h1>
+                <p class="subtitle">Current Baratza Encore baselines</p>
+            </header>
+            <div class="settings-list" id="settings-list">
+                <!-- Populated by JS -->
+            </div>
+            <button class="btn-secondary" id="reset-baselines">Reset to Defaults</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
