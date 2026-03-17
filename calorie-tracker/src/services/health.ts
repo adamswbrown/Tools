@@ -8,6 +8,7 @@ import type {
   NutritionEntry,
   HydrationData,
   WeightData,
+  ExerciseSession,
 } from '../types/health';
 import type { Product } from '../types';
 
@@ -153,5 +154,23 @@ export async function logWeight(kilograms: number): Promise<void> {
   });
 }
 
+// Fetch recent workouts/exercise sessions
+export async function getRecentWorkouts(days: number = 7): Promise<ExerciseSession[]> {
+  const service = await getService();
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  return service.getExerciseSessions(startDate, endDate);
+}
+
+export async function getWorkoutsForDate(date: Date): Promise<ExerciseSession[]> {
+  const service = await getService();
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  return service.getExerciseSessions(startOfDay, endOfDay);
+}
+
 // Re-export types for convenience
-export type { DailyHealthSummary, NutritionEntry, HealthPermissionStatus };
+export type { DailyHealthSummary, NutritionEntry, HealthPermissionStatus, ExerciseSession };

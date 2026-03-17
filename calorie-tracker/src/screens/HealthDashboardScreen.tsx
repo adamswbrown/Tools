@@ -13,8 +13,9 @@ import {
   requestAllHealthPermissions,
   getTodaySummary,
   getWeekSummaries,
+  getRecentWorkouts,
 } from '../services/health';
-import type { DailyHealthSummary, HealthPermissionStatus } from '../services/health';
+import type { DailyHealthSummary, HealthPermissionStatus, ExerciseSession } from '../services/health';
 import { colors, spacing, fontSize, borderRadius } from '../constants/theme';
 
 type ConnectionState = 'checking' | 'unavailable' | 'needs_permission' | 'connected' | 'error';
@@ -23,6 +24,7 @@ export function HealthDashboardScreen() {
   const [connectionState, setConnectionState] = useState<ConnectionState>('checking');
   const [todaySummary, setTodaySummary] = useState<DailyHealthSummary | null>(null);
   const [weekSummaries, setWeekSummaries] = useState<DailyHealthSummary[]>([]);
+  const [workouts, setWorkouts] = useState<ExerciseSession[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,9 +67,14 @@ export function HealthDashboardScreen() {
 
   async function loadData() {
     try {
-      const [today, week] = await Promise.all([getTodaySummary(), getWeekSummaries()]);
+      const [today, week, recentWorkouts] = await Promise.all([
+        getTodaySummary(),
+        getWeekSummaries(),
+        getRecentWorkouts(7),
+      ]);
       setTodaySummary(today);
       setWeekSummaries(week);
+      setWorkouts(recentWorkouts);
     } catch {
       // Partial data is fine
     }
@@ -133,6 +140,7 @@ export function HealthDashboardScreen() {
             value={todaySummary.distanceMeters ? Math.round(todaySummary.distanceMeters / 10) / 100 : undefined}
             unit="km"
           />
+          <SummaryTile label="Exercise" value={todaySummary.exerciseMinutes} unit="min" />
           <SummaryTile label="Weight" value={todaySummary.weight} unit="kg" />
           <SummaryTile label="Body Fat" value={todaySummary.bodyFatPercentage} unit="%" />
           <SummaryTile label="BMR" value={todaySummary.basalMetabolicRate} unit="kcal" />
@@ -153,6 +161,40 @@ export function HealthDashboardScreen() {
         </View>
       ) : (
         <Text style={styles.noData}>No data available for today</Text>
+      )}
+
+      {/* Recent Workouts */}
+      {workouts.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Recent Workouts</Text>
+          {workouts.map((workout, index) => (
+            <View key={`${workout.startDate}-${index}`} style={styles.workoutCard}>
+              <View style={styles.workoutHeader}>
+                <Text style={styles.workoutType}>{workout.type}</Text>
+                <Text style={styles.workoutDuration}>{workout.durationMinutes} min</Text>
+              </View>
+              <View style={styles.workoutDetails}>
+                {workout.caloriesBurned !== undefined && workout.caloriesBurned > 0 && (
+                  <Text style={styles.workoutStat}>{workout.caloriesBurned} kcal</Text>
+                )}
+                {workout.distanceMeters !== undefined && workout.distanceMeters > 0 && (
+                  <Text style={styles.workoutStat}>
+                    {(workout.distanceMeters / 1000).toFixed(2)} km
+                  </Text>
+                )}
+                <Text style={styles.workoutDate}>
+                  {new Date(workout.startDate).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </>
       )}
 
       {/* Week History */}
@@ -284,6 +326,24 @@ const styles = StyleSheet.create({
   tileValueHighlight: { color: colors.textLight },
   tileUnit: { fontSize: fontSize.sm, color: colors.textSecondary },
   noData: { fontSize: fontSize.md, color: colors.textSecondary, textAlign: 'center', marginVertical: spacing.lg },
+
+  // Workouts
+  workoutCard: {
+    backgroundColor: colors.surface, borderRadius: borderRadius.md, padding: spacing.md,
+    marginBottom: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1,
+  },
+  workoutHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  workoutType: { fontSize: fontSize.lg, fontWeight: '700', color: colors.text },
+  workoutDuration: { fontSize: fontSize.lg, fontWeight: '700', color: colors.primary },
+  workoutDetails: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm,
+  },
+  workoutStat: { fontSize: fontSize.md, color: colors.accent, fontWeight: '600' },
+  workoutDate: { fontSize: fontSize.sm, color: colors.textSecondary },
 
   // Week
   weekRow: {

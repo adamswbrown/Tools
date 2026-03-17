@@ -445,7 +445,7 @@ export const androidHealthService: HealthService = {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const [steps, calories, distance, weight, bodyFat, bmr, sleep, hydration] =
+    const [steps, calories, distance, weight, bodyFat, bmr, sleep, hydration, exercises] =
       await Promise.allSettled([
         this.getSteps(startOfDay, endOfDay),
         this.getCaloriesBurned(startOfDay, endOfDay),
@@ -455,6 +455,7 @@ export const androidHealthService: HealthService = {
         this.getBasalMetabolicRate(startOfDay, endOfDay),
         this.getSleep(startOfDay, endOfDay),
         this.getHydration(startOfDay, endOfDay),
+        this.getExerciseSessions(startOfDay, endOfDay),
       ]);
 
     const stepsVal = steps.status === 'fulfilled' && steps.value[0]?.value;
@@ -465,6 +466,9 @@ export const androidHealthService: HealthService = {
     const bmrVal = bmr.status === 'fulfilled' && bmr.value[0]?.kcalPerDay;
     const sleepVal = sleep.status === 'fulfilled' && sleep.value[0]?.totalMinutes;
     const waterVal = hydration.status === 'fulfilled' && hydration.value[0]?.liters;
+    const exerciseMinutes = exercises.status === 'fulfilled'
+      ? exercises.value.reduce((sum, e) => sum + e.durationMinutes, 0)
+      : undefined;
 
     return {
       date: dateStr(date),
@@ -473,6 +477,7 @@ export const androidHealthService: HealthService = {
       basalCalories: calsVal ? calsVal.basalCalories : undefined,
       totalCaloriesBurned: calsVal ? calsVal.totalCalories : undefined,
       distanceMeters: distVal || undefined,
+      exerciseMinutes: exerciseMinutes || undefined,
       weight: weightVal || undefined,
       bodyFatPercentage: bfVal || undefined,
       basalMetabolicRate: bmrVal || undefined,
