@@ -60,4 +60,5 @@ export type RootStackParamList = {
   Scanner: undefined;
   Product: { barcode: string };
   History: undefined;
+  HealthDashboard: undefined;
 };

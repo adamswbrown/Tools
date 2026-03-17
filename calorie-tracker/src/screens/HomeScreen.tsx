@@ -31,13 +31,22 @@ export function HomeScreen() {
         <Text style={styles.subtitle}>Scan a barcode to get nutrition info</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.scanButton}
-        onPress={() => navigation.navigate('Scanner')}
-      >
-        <Text style={styles.scanIcon}>[ ]</Text>
-        <Text style={styles.scanButtonText}>Scan Barcode</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={styles.scanButton}
+          onPress={() => navigation.navigate('Scanner')}
+        >
+          <Text style={styles.scanIcon}>[ ]</Text>
+          <Text style={styles.scanButtonText}>Scan Barcode</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.healthButton}
+          onPress={() => navigation.navigate('HealthDashboard')}
+        >
+          <Text style={styles.healthButtonText}>Health Data</Text>
+        </TouchableOpacity>
+      </View>
 
       {recentScans.length > 0 && (
         <View style={styles.recentSection}>
@@ -98,10 +107,12 @@ const styles = StyleSheet.create({
     color: colors.primaryLight,
     marginTop: spacing.xs,
   },
-  scanButton: {
-    backgroundColor: colors.primary,
+  buttonRow: {
     marginHorizontal: spacing.lg,
     marginTop: -spacing.md,
+  },
+  scanButton: {
+    backgroundColor: colors.primary,
     paddingVertical: spacing.lg,
     borderRadius: borderRadius.xl,
     alignItems: 'center',
@@ -110,6 +121,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+  },
+  healthButton: {
+    backgroundColor: '#E91E63',
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  healthButtonText: {
+    color: colors.textLight,
+    fontSize: fontSize.lg,
+    fontWeight: '600',
   },
   scanIcon: {
     fontSize: fontSize.hero,

@@ -6,6 +6,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { ScannerScreen } from './src/screens/ScannerScreen';
 import { ProductScreen } from './src/screens/ProductScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
+import { HealthDashboardScreen } from './src/screens/HealthDashboardScreen';
 import { colors } from './src/constants/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +41,11 @@ export default function App() {
           name="History"
           component={HistoryScreen}
           options={{ title: 'Scan History' }}
+        />
+        <Stack.Screen
+          name="HealthDashboard"
+          component={HealthDashboardScreen}
+          options={{ title: 'Health Data' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
