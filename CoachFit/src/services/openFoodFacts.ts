@@ -91,7 +91,7 @@ export async function lookupBarcode(barcode: string): Promise<Product | null> {
 
   const response = await fetch(url, {
     headers: {
-      'User-Agent': 'CalorieTracker/1.0 (contact@calorietracker.app)',
+      'User-Agent': 'CoachFit/1.0 (contact@coachfit.app)',
     },
   });
 

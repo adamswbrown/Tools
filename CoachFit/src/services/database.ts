@@ -5,7 +5,7 @@ let db: SQLite.SQLiteDatabase | null = null;
 
 async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (!db) {
-    db = await SQLite.openDatabaseAsync('calorietracker.db');
+    db = await SQLite.openDatabaseAsync('coachfit.db');
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS products (
         barcode TEXT PRIMARY KEY,

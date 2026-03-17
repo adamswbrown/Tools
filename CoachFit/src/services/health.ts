@@ -32,7 +32,7 @@ async function getService(): Promise<HealthService> {
   return platformService;
 }
 
-// ── All read permissions for the calorie tracker ────────────────────
+// ── All read permissions for CoachFit ────────────────────────────────
 const ALL_READ_TYPES: HealthDataType[] = [
   'steps',
   'activeCalories',

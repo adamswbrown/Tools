@@ -27,7 +27,7 @@ export function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Calorie Tracker</Text>
+        <Text style={styles.title}>CoachFit</Text>
         <Text style={styles.subtitle}>Scan a barcode to get nutrition info</Text>
       </View>
 

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "calorie-tracker",
-    "slug": "calorie-tracker",
+    "name": "CoachFit",
+    "slug": "coachfit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,8 +14,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSHealthShareUsageDescription": "Calorie Tracker reads your health data to display activity, nutrition, and body metrics.",
-        "NSHealthUpdateUsageDescription": "Calorie Tracker writes nutrition entries from scanned foods to your Health data."
+        "NSHealthShareUsageDescription": "CoachFit reads your health data to display activity, nutrition, and body metrics.",
+        "NSHealthUpdateUsageDescription": "CoachFit writes nutrition entries from scanned foods to your Health data."
       },
       "entitlements": {
         "com.apple.developer.healthkit": true,
@@ -66,7 +66,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Calorie Tracker to use the camera to scan barcodes."
+          "cameraPermission": "Allow CoachFit to use the camera to scan barcodes."
         }
       ]
     ]
