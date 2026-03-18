@@ -4,25 +4,31 @@ const HISTORY_KEY = 'measurement-tracker-history';
 
 // Google Apps Script code to embed in settings instructions
 const APPS_SCRIPT_CODE = `function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
 
-  sheet.appendRow([
-    data.timestamp,
-    data.name,
-    data.date,
-    data.leftArm,
-    data.rightArm,
-    data.waist,
-    data.leftLeg,
-    data.rightLeg,
-    data.chest,
-    data.hips
-  ]);
+    sheet.appendRow([
+      data.timestamp,
+      data.name,
+      data.date,
+      data.leftArm,
+      data.rightArm,
+      data.waist,
+      data.leftLeg,
+      data.rightLeg,
+      data.chest,
+      data.hips
+    ]);
 
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok' }))
-    .setMimeType(ContentService.MimeType.JSON);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function doGet(e) {
@@ -87,10 +93,24 @@ function initSettings() {
     document.getElementById('clear-history-btn').addEventListener('click', handleClearHistory);
 }
 
+function isValidScriptUrl(url) {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https:' && parsed.hostname.endsWith('.google.com');
+    } catch {
+        return false;
+    }
+}
+
 function handleSaveUrl() {
     const input = document.getElementById('script-url');
     const url = input.value.trim();
     if (!url) return;
+
+    if (!isValidScriptUrl(url)) {
+        showSettingsStatus('Please enter a valid Google Apps Script URL (https://script.google.com/...).', 'error');
+        return;
+    }
 
     localStorage.setItem(STORAGE_KEY, url);
     updateConnectionBadge(true);
@@ -109,12 +129,14 @@ function handleTestUrl() {
     btn.disabled = true;
     btn.textContent = 'Testing...';
 
+    // Google Apps Script redirects make CORS responses opaque,
+    // so we can only confirm the network request didn't fail outright.
     fetch(url, { method: 'GET', mode: 'no-cors' })
         .then(() => {
-            showSettingsStatus('Request sent. If your script is set up correctly, it should be working.', 'success');
+            showSettingsStatus('Network request sent successfully. Submit a test measurement to verify end-to-end.', 'success');
         })
         .catch(() => {
-            showSettingsStatus('Could not reach the URL. Check that it is correct.', 'error');
+            showSettingsStatus('Network error. Check the URL and your internet connection.', 'error');
         })
         .finally(() => {
             btn.disabled = false;
@@ -232,14 +254,16 @@ async function handleSubmit(e) {
     resetForm(form, btn, btnText, btnLoading);
 }
 
+// Google Apps Script uses a 302 redirect that blocks CORS preflight,
+// so no-cors is required. The trade-off is we can't read the response
+// status — only network-level failures (offline, DNS) will throw.
 async function sendToSheet(url, data) {
-    const response = await fetch(url, {
+    await fetch(url, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
-    return response;
 }
 
 function resetForm(form, btn, btnText, btnLoading) {
@@ -286,16 +310,16 @@ function renderHistory() {
         <div class="history-item">
             <div class="history-item-header">
                 <span class="history-item-name">${escapeHtml(entry.name)}</span>
-                <span class="history-item-date">${entry.date}</span>
+                <span class="history-item-date">${escapeHtml(entry.date)}</span>
             </div>
             <div class="history-item-measurements">
-                <span>L.Arm: <strong>${entry.leftArm}"</strong></span>
-                <span>R.Arm: <strong>${entry.rightArm}"</strong></span>
-                <span>Waist: <strong>${entry.waist}"</strong></span>
-                <span>L.Leg: <strong>${entry.leftLeg}"</strong></span>
-                <span>R.Leg: <strong>${entry.rightLeg}"</strong></span>
-                <span>Chest: <strong>${entry.chest}"</strong></span>
-                <span>Hips: <strong>${entry.hips}"</strong></span>
+                <span>L.Arm: <strong>${escapeHtml(String(entry.leftArm))}"</strong></span>
+                <span>R.Arm: <strong>${escapeHtml(String(entry.rightArm))}"</strong></span>
+                <span>Waist: <strong>${escapeHtml(String(entry.waist))}"</strong></span>
+                <span>L.Leg: <strong>${escapeHtml(String(entry.leftLeg))}"</strong></span>
+                <span>R.Leg: <strong>${escapeHtml(String(entry.rightLeg))}"</strong></span>
+                <span>Chest: <strong>${escapeHtml(String(entry.chest))}"</strong></span>
+                <span>Hips: <strong>${escapeHtml(String(entry.hips))}"</strong></span>
             </div>
         </div>
     `).join('');
