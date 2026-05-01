@@ -1,0 +1,24 @@
+ServiceClass,Workload,Notes
+MSSQLSvc,SQL Server,SQL Server instance; SPN target encodes host:port
+HTTP,IIS / SharePoint / Web,IIS, SharePoint, web apps
+exchangeMDB,Exchange,Exchange mailbox database
+exchangeRFR,Exchange,Exchange referral
+SMTPSVC,Exchange,Exchange SMTP transport
+TERMSRV,Terminal Services / RDS,Remote Desktop Session Host
+WSMAN,WinRM endpoint,Server is WinRM-reachable
+host,IGNORE,Default computer SPN registered against every machine
+RestrictedKrbHost,IGNORE,Kerberos host SPN; not workload-bearing
+ldap,Domain Controller,DC role
+GC,Domain Controller,Global Catalog role
+kadmin,Domain Controller,Kerberos admin
+DNS,Domain Controller,Integrated DNS
+MSOMHSvc,SCOM,SCOM agent / management server
+MSOMSdkSvc,SCOM,SCOM SDK service
+Hyper-V Replica Service,Hyper-V,Hyper-V host
+MSServerClusterMgmtAPI,Failover cluster,Windows Server Failover Cluster
+IMAP,Mail service,IMAP server
+POP,Mail service,POP3 server
+SMTP,Mail service,Generic SMTP service
+ftp,FTP,FTP server
+cifs,File server,SMB/CIFS share host (extra-detected; host SPNs already cover SMB)
+vmrc,VMware / vCenter,VMware management
