@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servicenow-cmdb-export"
+version = "0.1.0"
+description = "Export CMDB server/client to business-app and environment mappings from ServiceNow into Excel."
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "openpyxl>=3.1",
+    "click>=8.1",
+]
+
+[project.scripts]
+snow-cmdb-export = "servicenow_cmdb_export.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["servicenow_cmdb_export*"]
