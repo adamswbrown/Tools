@@ -16,7 +16,7 @@ import logging
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable
 
 from dmc_prepop.ad.connect import ADSession
 from dmc_prepop.ad.spn import parse_spn, workload_for

@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import csv
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 
 from dmc_prepop.sccm.extract import QueryResult as SCCMResult
 
