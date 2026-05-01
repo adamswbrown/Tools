@@ -5,11 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dmc-prepop"
 version = "0.1.0"
-description = "Extract server inventory from System Center (SCCM/SCOM/SCOM DW) to feed Dr Migrate cloud assessment."
+description = "Extract server inventory from Active Directory and System Center (SCCM/SCOM/SCOM DW) to feed Dr Migrate cloud assessment."
 requires-python = ">=3.10"
 dependencies = [
     "click>=8.1",
     "pymssql>=2.2",
+    "ldap3>=2.9",
 ]
 
 [project.optional-dependencies]
