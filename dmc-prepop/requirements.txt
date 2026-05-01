@@ -1,3 +1,4 @@
 click>=8.1
 pymssql>=2.2
+ldap3>=2.9
 # Optional: pyodbc>=5.0 for Windows Integrated auth via ODBC
