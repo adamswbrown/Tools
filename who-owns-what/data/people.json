@@ -1,0 +1,169 @@
+[
+  {
+    "id": "elon-musk",
+    "name": "Elon Musk",
+    "title": "CEO of Tesla & SpaceX; owner of X",
+    "citizenship": "United States / South Africa / Canada",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (figures fluctuate daily with Tesla's stock price)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/elon-musk/" } },
+    "companies": [
+      { "company": "Tesla", "role": "CEO, largest individual shareholder", "source": { "name": "SEC Tesla DEF 14A / Form 4", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=DEF+14A" } },
+      { "company": "SpaceX", "role": "Founder, CEO, controlling shareholder (private)", "source": { "name": "Forbes profile", "url": "https://www.forbes.com/profile/elon-musk/" } },
+      { "company": "X (formerly Twitter)", "role": "Owner (acquired 2022)", "source": { "name": "SEC filings (Twitter acquisition)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001418091" } },
+      { "company": "xAI / The Boring Company / Neuralink", "role": "Founder / controlling stakeholder (private)", "source": { "name": "Forbes profile", "url": "https://www.forbes.com/profile/elon-musk/" } }
+    ],
+    "assets": [
+      { "description": "Large equity stake in Tesla, plus pledged shares used as collateral (disclosed in Tesla proxy).", "source": { "name": "SEC Tesla DEF 14A", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=DEF+14A" } }
+    ],
+    "boards": [
+      { "role": "Tesla board (Technoking/CEO)", "source": { "name": "SEC Tesla filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605" } }
+    ],
+    "foundations": [
+      { "name": "Musk Foundation", "source": { "name": "IRS Form 990 (ProPublica Nonprofit Explorer)", "url": "https://projects.propublica.org/nonprofits/" } }
+    ],
+    "politicalSpending": [
+      { "description": "Political contributions and super PAC activity (e.g., 2024 cycle).", "source": { "name": "FEC individual contribution search", "url": "https://www.fec.gov/data/receipts/individual-contributions/" } }
+    ],
+    "timeline": [
+      { "date": "2004", "event": "Leads Series A investment in Tesla; later becomes CEO.", "source": { "name": "SEC Tesla filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605" } },
+      { "date": "2002", "event": "Founds SpaceX.", "source": { "name": "Forbes profile", "url": "https://www.forbes.com/profile/elon-musk/" } },
+      { "date": "2022", "event": "Acquires Twitter for ~$44 billion.", "source": { "name": "SEC filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001418091" } }
+    ]
+  },
+  {
+    "id": "jeff-bezos",
+    "name": "Jeff Bezos",
+    "title": "Founder & Executive Chairman of Amazon; founder of Blue Origin",
+    "citizenship": "United States",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (fluctuates with Amazon's stock price)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/jeff-bezos/" } },
+    "companies": [
+      { "company": "Amazon", "role": "Founder, Executive Chairman, largest individual shareholder (~9%)", "source": { "name": "SEC Amazon DEF 14A", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+      { "company": "Blue Origin", "role": "Founder / owner (private)", "source": { "name": "Forbes profile", "url": "https://www.forbes.com/profile/jeff-bezos/" } },
+      { "company": "The Washington Post", "role": "Owner (acquired 2013, personal purchase)", "source": { "name": "The Washington Post — ownership", "url": "https://www.washingtonpost.com/" } }
+    ],
+    "assets": [
+      { "description": "Amazon equity, real estate holdings, and other private investments (e.g., via Bezos Expeditions).", "source": { "name": "SEC Form 4 filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=4" } }
+    ],
+    "boards": [
+      { "role": "Amazon board (Executive Chairman)", "source": { "name": "SEC Amazon filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724" } }
+    ],
+    "foundations": [
+      { "name": "Bezos Earth Fund / Bezos Day One Fund", "source": { "name": "Bezos Earth Fund", "url": "https://www.bezosearthfund.org/" } }
+    ],
+    "politicalSpending": [
+      { "description": "Personal and corporate-linked political activity (see FEC and OpenSecrets).", "source": { "name": "FEC individual contribution search", "url": "https://www.fec.gov/data/receipts/individual-contributions/" } }
+    ],
+    "timeline": [
+      { "date": "1994", "event": "Founds Amazon.", "source": { "name": "Amazon corporate history", "url": "https://www.aboutamazon.com/about-us" } },
+      { "date": "2000", "event": "Founds Blue Origin.", "source": { "name": "Blue Origin", "url": "https://www.blueorigin.com/" } },
+      { "date": "2021", "event": "Steps down as Amazon CEO; becomes Executive Chairman.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=8-K" } }
+    ]
+  },
+  {
+    "id": "warren-buffett",
+    "name": "Warren Buffett",
+    "title": "Chairman & CEO of Berkshire Hathaway",
+    "citizenship": "United States",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (mostly Berkshire Hathaway stock)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/warren-buffett/" } },
+    "companies": [
+      { "company": "Berkshire Hathaway", "role": "Chairman, CEO, controlling shareholder", "source": { "name": "SEC Berkshire DEF 14A", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } }
+    ],
+    "assets": [
+      { "description": "Controlling stake in Berkshire Hathaway; Berkshire in turn holds large positions in Apple, Coca-Cola, American Express, and others.", "source": { "name": "Berkshire 13F filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=13F" } }
+    ],
+    "boards": [
+      { "role": "Berkshire Hathaway board (Chairman)", "source": { "name": "SEC Berkshire filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983" } }
+    ],
+    "foundations": [
+      { "name": "Major lifetime pledges to the Gates Foundation and family foundations (The Giving Pledge co-founder).", "source": { "name": "The Giving Pledge", "url": "https://givingpledge.org/" } }
+    ],
+    "politicalSpending": [
+      { "description": "Personal political contributions (see FEC).", "source": { "name": "FEC individual contribution search", "url": "https://www.fec.gov/data/receipts/individual-contributions/" } }
+    ],
+    "timeline": [
+      { "date": "1965", "event": "Takes control of Berkshire Hathaway.", "source": { "name": "Berkshire shareholder letters", "url": "https://www.berkshirehathaway.com/letters/letters.html" } },
+      { "date": "2006", "event": "Pledges the bulk of his fortune to philanthropy; co-founds The Giving Pledge in 2010.", "source": { "name": "The Giving Pledge", "url": "https://givingpledge.org/" } }
+    ]
+  },
+  {
+    "id": "bernard-arnault",
+    "name": "Bernard Arnault",
+    "title": "Chairman & CEO of LVMH",
+    "citizenship": "France",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (mostly LVMH ownership)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/bernard-arnault/" } },
+    "companies": [
+      { "company": "LVMH Moët Hennessy Louis Vuitton", "role": "Chairman, CEO, controlling shareholder (via family holding companies)", "source": { "name": "LVMH financial filings (AMF, France)", "url": "https://www.lvmh.com/investors/" } },
+      { "company": "Christian Dior SE", "role": "Controlling shareholder", "source": { "name": "LVMH / Dior filings", "url": "https://www.lvmh.com/investors/" } }
+    ],
+    "assets": [
+      { "description": "Controlling family stake in LVMH (which owns Louis Vuitton, Dior, Tiffany & Co., and dozens of luxury brands).", "source": { "name": "LVMH investor relations", "url": "https://www.lvmh.com/investors/" } }
+    ],
+    "boards": [
+      { "role": "LVMH board (Chairman)", "source": { "name": "LVMH governance", "url": "https://www.lvmh.com/group/about-lvmh/governance/" } }
+    ],
+    "foundations": [
+      { "name": "Fondation Louis Vuitton", "source": { "name": "Fondation Louis Vuitton", "url": "https://www.fondationlouisvuitton.fr/" } }
+    ],
+    "politicalSpending": [
+      { "description": "Political-finance disclosure differs under French law; refer to LVMH governance and French regulators.", "source": { "name": "LVMH governance", "url": "https://www.lvmh.com/group/about-lvmh/governance/" } }
+    ],
+    "timeline": [
+      { "date": "1989", "event": "Takes control of LVMH.", "source": { "name": "LVMH history", "url": "https://www.lvmh.com/group/about-lvmh/the-lvmh-story/" } },
+      { "date": "2021", "event": "LVMH completes ~$15.8 billion acquisition of Tiffany & Co.", "source": { "name": "Tiffany SEC filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=tiffany&type=8-K" } }
+    ]
+  },
+  {
+    "id": "bill-gates",
+    "name": "Bill Gates",
+    "title": "Co-founder of Microsoft; co-chair of the Gates Foundation",
+    "citizenship": "United States",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (diversified beyond Microsoft)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/bill-gates/" } },
+    "companies": [
+      { "company": "Microsoft", "role": "Co-founder; reduced holdings over time", "source": { "name": "SEC Microsoft filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000789019" } },
+      { "company": "Cascade Investment", "role": "Owner of his primary investment vehicle (private; holds stakes in many public companies)", "source": { "name": "SEC 13F / 13D filings (Cascade)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=cascade+investment&type=13" } }
+    ],
+    "assets": [
+      { "description": "Large, diversified portfolio via Cascade Investment (e.g., farmland, public equities) and Microsoft shares.", "source": { "name": "SEC filings (Cascade Investment)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=cascade+investment&type=13" } }
+    ],
+    "boards": [
+      { "role": "Former Microsoft board member; Gates Foundation co-chair/trustee", "source": { "name": "Gates Foundation leadership", "url": "https://www.gatesfoundation.org/about/leadership" } }
+    ],
+    "foundations": [
+      { "name": "Bill & Melinda Gates Foundation", "source": { "name": "Gates Foundation IRS Form 990", "url": "https://projects.propublica.org/nonprofits/organizations/562618866" } }
+    ],
+    "politicalSpending": [
+      { "description": "Personal political contributions (see FEC).", "source": { "name": "FEC individual contribution search", "url": "https://www.fec.gov/data/receipts/individual-contributions/" } }
+    ],
+    "timeline": [
+      { "date": "1975", "event": "Co-founds Microsoft with Paul Allen.", "source": { "name": "Microsoft history", "url": "https://news.microsoft.com/facts-about-microsoft/" } },
+      { "date": "2000", "event": "Bill & Melinda Gates Foundation established.", "source": { "name": "Gates Foundation", "url": "https://www.gatesfoundation.org/" } },
+      { "date": "2020", "event": "Steps down from the Microsoft board.", "source": { "name": "Microsoft news", "url": "https://news.microsoft.com/" } }
+    ]
+  },
+  {
+    "id": "mark-zuckerberg",
+    "name": "Mark Zuckerberg",
+    "title": "Founder, Chairman & CEO of Meta Platforms",
+    "citizenship": "United States",
+    "netWorth": { "amount": "Estimated in the hundreds of billions USD (fluctuates with Meta's stock price)", "year": "2024+", "source": { "name": "Forbes Real-Time Billionaires", "url": "https://www.forbes.com/profile/mark-zuckerberg/" } },
+    "companies": [
+      { "company": "Meta Platforms (Facebook, Instagram, WhatsApp)", "role": "Founder, Chairman, CEO; controls majority of voting power via Class B shares", "source": { "name": "SEC Meta DEF 14A", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326801&type=DEF+14A" } }
+    ],
+    "assets": [
+      { "description": "Dual-class share structure gives him majority voting control of Meta despite a minority economic stake.", "source": { "name": "SEC Meta DEF 14A", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326801&type=DEF+14A" } }
+    ],
+    "boards": [
+      { "role": "Meta Platforms board (Chairman)", "source": { "name": "SEC Meta filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326801" } }
+    ],
+    "foundations": [
+      { "name": "Chan Zuckerberg Initiative (structured as an LLC, not a traditional foundation)", "source": { "name": "Chan Zuckerberg Initiative", "url": "https://chanzuckerberg.com/" } }
+    ],
+    "politicalSpending": [
+      { "description": "Personal contributions and CZI-funded civic activity (see FEC and public reporting).", "source": { "name": "FEC individual contribution search", "url": "https://www.fec.gov/data/receipts/individual-contributions/" } }
+    ],
+    "timeline": [
+      { "date": "2004", "event": "Founds Facebook.", "source": { "name": "Meta company info", "url": "https://about.meta.com/company-info/" } },
+      { "date": "2012", "event": "Facebook IPO; acquires Instagram for ~$1 billion.", "source": { "name": "SEC filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326801" } },
+      { "date": "2014", "event": "Acquires WhatsApp for ~$19 billion.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326801&type=8-K" } }
+    ]
+  }
+]
