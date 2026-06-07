@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Who Owns What? — Corporate Ownership & Influence Transparency</title>
+  <meta name="description" content="Search a company or billionaire and see ownership, executive pay, lobbying, political spending, fines, and labor issues — every claim linked to a primary public source." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#/" class="brand" aria-label="Who Owns What home">
+        <span class="brand-mark">◎</span>
+        <span class="brand-text">Who Owns What<span class="brand-q">?</span></span>
+      </a>
+      <form class="search" id="searchForm" role="search">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search a company, billionaire, or executive…"
+          autocomplete="off"
+          aria-label="Search companies and people"
+        />
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
+      <nav class="topnav">
+        <a href="#/">Discover</a>
+        <a href="#/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="container">
+    <!-- Rendered by app.js -->
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>
+        <strong>Who Owns What?</strong> is an open, source-first transparency reference.
+        Every figure links back to a primary public source — SEC filings, FEC and OpenSecrets
+        records, court and regulator databases, and official company reports.
+      </p>
+      <p class="footer-disclaimer">
+        This is a public-interest demonstration built on a curated sample dataset. Figures are
+        approximate and illustrative — always confirm the current numbers at the linked source.
+        Nothing here is investment advice.
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

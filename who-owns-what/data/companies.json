@@ -1,0 +1,185 @@
+[
+  {
+    "id": "walmart",
+    "name": "Walmart Inc.",
+    "ticker": "NYSE: WMT",
+    "sector": "Retail",
+    "headquarters": "Bentonville, Arkansas, USA",
+    "summary": "The largest private employer in the world and the largest retailer by revenue. Founded by Sam Walton in 1962; the Walton family remains the controlling shareholder.",
+    "shareholders": [
+      { "holder": "Walton family (Walton Enterprises & Walton Family Holdings Trust)", "stake": "~45% combined", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } },
+      { "holder": "The Vanguard Group", "stake": "~4%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~2.5%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } }
+    ],
+    "ceoPay": { "name": "Doug McMillon", "amount": "~$27 million", "year": "FY2024", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } },
+    "medianPay": { "amount": "~$27,600", "year": "FY2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } },
+    "payRatio": { "value": "~900:1 to ~1,000:1 (CEO to median worker)", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=DEF+14A" } },
+    "lobbying": { "amount": "~$6–8 million / year", "year": "recent annual", "source": { "name": "OpenSecrets — Walmart lobbying", "url": "https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000000367" } },
+    "politicalSpending": { "amount": "Walmart PAC contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — Walmart", "url": "https://www.opensecrets.org/orgs/walmart-inc/summary?id=D000000367" } },
+    "fines": [
+      { "description": "Aggregate federal/state penalties tracked across categories (employment, environmental, consumer protection, etc.)", "amount": "billions cumulatively since 2000", "agency": "Multiple", "source": { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/parent/wal-mart-stores" } }
+    ],
+    "labor": [
+      { "description": "Long-running disputes over wages, scheduling, and unionization; no U.S. store has sustained a union. Workers' organizing efforts documented over many years.", "year": "ongoing", "source": { "name": "NLRB case search", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "Largest grocery seller in the United States (roughly a quarter of U.S. grocery sales).", "source": { "name": "USDA ERS / company reports", "url": "https://www.ers.usda.gov/topics/food-markets-prices/retailing-wholesaling/" } },
+    "competitors": ["Amazon", "Costco", "Kroger", "Target"],
+    "timeline": [
+      { "date": "1962", "event": "First Walmart store opens in Rogers, Arkansas.", "source": { "name": "Walmart corporate history", "url": "https://corporate.walmart.com/about/history" } },
+      { "date": "1970", "event": "Walmart goes public on the NYSE.", "source": { "name": "SEC EDGAR", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169" } },
+      { "date": "2018", "event": "Acquires majority stake in Flipkart for ~$16 billion.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169&type=8-K" } }
+    ]
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon.com, Inc.",
+    "ticker": "NASDAQ: AMZN",
+    "sector": "E-commerce / Cloud computing",
+    "headquarters": "Seattle, Washington, USA",
+    "summary": "Global e-commerce, logistics, and cloud-computing company (AWS). Founded by Jeff Bezos in 1994.",
+    "shareholders": [
+      { "holder": "Jeff Bezos (founder)", "stake": "~9%", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+      { "holder": "The Vanguard Group", "stake": "~7%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~6%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } }
+    ],
+    "ceoPay": { "name": "Andy Jassy", "amount": "~$1.3 million base + large prior equity grants vesting over years", "year": "2023", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+    "medianPay": { "amount": "~$37,000", "year": "2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+    "payRatio": { "value": "varies year to year (driven by equity vesting)", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=DEF+14A" } },
+    "lobbying": { "amount": "~$15–20 million / year (one of the largest corporate spenders)", "year": "recent annual", "source": { "name": "OpenSecrets — Amazon lobbying", "url": "https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000023883" } },
+    "politicalSpending": { "amount": "PAC and individual contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — Amazon", "url": "https://www.opensecrets.org/orgs/amazon-com/summary?id=D000023883" } },
+    "fines": [
+      { "description": "FTC settlements and penalties (e.g., privacy and consumer-protection matters) plus other regulatory penalties.", "amount": "hundreds of millions cumulatively", "agency": "FTC and others", "source": { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/parent/amazoncom" } }
+    ],
+    "labor": [
+      { "description": "Warehouse working-conditions disputes; first U.S. union win at the JFK8 Staten Island facility (Amazon Labor Union, 2022).", "year": "2022", "source": { "name": "NLRB election results", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "Leading U.S. e-commerce retailer; AWS is a top global cloud-infrastructure provider.", "source": { "name": "Company 10-K", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=10-K" } },
+    "competitors": ["Walmart", "Microsoft (Azure)", "Google Cloud", "Alibaba"],
+    "timeline": [
+      { "date": "1994", "event": "Founded by Jeff Bezos as an online bookstore.", "source": { "name": "Amazon corporate history", "url": "https://www.aboutamazon.com/about-us" } },
+      { "date": "1997", "event": "IPO on NASDAQ.", "source": { "name": "SEC EDGAR", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724" } },
+      { "date": "2017", "event": "Acquires Whole Foods Market for ~$13.7 billion.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=8-K" } }
+    ]
+  },
+  {
+    "id": "apple",
+    "name": "Apple Inc.",
+    "ticker": "NASDAQ: AAPL",
+    "sector": "Consumer electronics / Technology",
+    "headquarters": "Cupertino, California, USA",
+    "summary": "Designer of the iPhone, Mac, and related hardware and services. Among the most valuable public companies in the world.",
+    "shareholders": [
+      { "holder": "The Vanguard Group", "stake": "~8%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~7%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=DEF+14A" } },
+      { "holder": "Berkshire Hathaway", "stake": "~2–5% (position varies)", "source": { "name": "Berkshire 13F filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=13F" } }
+    ],
+    "ceoPay": { "name": "Tim Cook", "amount": "~$63 million (2023)", "year": "2023", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=DEF+14A" } },
+    "medianPay": { "amount": "~$94,000", "year": "2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=DEF+14A" } },
+    "payRatio": { "value": "~670:1 (2023)", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=DEF+14A" } },
+    "lobbying": { "amount": "~$7–10 million / year", "year": "recent annual", "source": { "name": "OpenSecrets — Apple lobbying", "url": "https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000021754" } },
+    "politicalSpending": { "amount": "PAC and individual contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — Apple", "url": "https://www.opensecrets.org/orgs/apple-inc/summary?id=D000021754" } },
+    "fines": [
+      { "description": "Antitrust and consumer-protection penalties in multiple jurisdictions (e.g., EU competition rulings).", "amount": "billions cumulatively (incl. EU)", "agency": "European Commission and others", "source": { "name": "European Commission competition decisions", "url": "https://competition-cases.ec.europa.eu/" } }
+    ],
+    "labor": [
+      { "description": "First U.S. Apple Store union (Towson, Maryland) voted to unionize in 2022.", "year": "2022", "source": { "name": "NLRB election results", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "Leading global smartphone vendor by revenue; large share of premium handset market.", "source": { "name": "Company 10-K", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K" } },
+    "competitors": ["Samsung", "Google", "Microsoft", "Huawei"],
+    "timeline": [
+      { "date": "1976", "event": "Founded by Steve Jobs, Steve Wozniak, and Ronald Wayne.", "source": { "name": "Apple newsroom", "url": "https://www.apple.com/newsroom/" } },
+      { "date": "1980", "event": "Initial public offering.", "source": { "name": "SEC EDGAR", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193" } },
+      { "date": "2018", "event": "First U.S. company to reach a $1 trillion market capitalization.", "source": { "name": "SEC filings / market data", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193" } }
+    ]
+  },
+  {
+    "id": "exxonmobil",
+    "name": "Exxon Mobil Corporation",
+    "ticker": "NYSE: XOM",
+    "sector": "Oil & gas",
+    "headquarters": "Spring, Texas, USA",
+    "summary": "One of the largest publicly traded integrated oil and gas companies in the world.",
+    "shareholders": [
+      { "holder": "The Vanguard Group", "stake": "~9%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~7%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } },
+      { "holder": "State Street", "stake": "~5%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } }
+    ],
+    "ceoPay": { "name": "Darren Woods", "amount": "~$36 million (2023)", "year": "2023", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } },
+    "medianPay": { "amount": "~$170,000", "year": "2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } },
+    "payRatio": { "value": "~210:1 (2023)", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=DEF+14A" } },
+    "lobbying": { "amount": "~$10–14 million / year", "year": "recent annual", "source": { "name": "OpenSecrets — ExxonMobil lobbying", "url": "https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000000129" } },
+    "politicalSpending": { "amount": "PAC and individual contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — ExxonMobil", "url": "https://www.opensecrets.org/orgs/exxon-mobil/summary?id=D000000129" } },
+    "fines": [
+      { "description": "Environmental and safety penalties across decades (e.g., Clean Air Act and spill-related settlements).", "amount": "billions cumulatively", "agency": "EPA and others", "source": { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/parent/exxon-mobil" } }
+    ],
+    "labor": [
+      { "description": "Beaumont, Texas refinery lockout of USW-represented workers (2021–2022).", "year": "2021", "source": { "name": "NLRB case search", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "Among the largest investor-owned oil and gas producers globally.", "source": { "name": "Company 10-K", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=10-K" } },
+    "competitors": ["Chevron", "Shell", "BP", "TotalEnergies"],
+    "timeline": [
+      { "date": "1999", "event": "Exxon and Mobil merge to form ExxonMobil.", "source": { "name": "SEC filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088" } },
+      { "date": "2023", "event": "Announces ~$60 billion acquisition of Pioneer Natural Resources.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000034088&type=8-K" } }
+    ]
+  },
+  {
+    "id": "jpmorgan",
+    "name": "JPMorgan Chase & Co.",
+    "ticker": "NYSE: JPM",
+    "sector": "Banking / Financial services",
+    "headquarters": "New York, New York, USA",
+    "summary": "The largest U.S. bank by assets, offering consumer banking, investment banking, and asset management.",
+    "shareholders": [
+      { "holder": "The Vanguard Group", "stake": "~8%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~7%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } },
+      { "holder": "State Street", "stake": "~4%", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } }
+    ],
+    "ceoPay": { "name": "Jamie Dimon", "amount": "~$36 million (2023)", "year": "2023", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } },
+    "medianPay": { "amount": "~$85,000", "year": "2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } },
+    "payRatio": { "value": "~420:1 (2023)", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=DEF+14A" } },
+    "lobbying": { "amount": "~$3–5 million / year", "year": "recent annual", "source": { "name": "OpenSecrets — JPMorgan lobbying", "url": "https://www.opensecrets.org/federal-lobbying/clients/summary?id=D000000103" } },
+    "politicalSpending": { "amount": "PAC and individual contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — JPMorgan Chase", "url": "https://www.opensecrets.org/orgs/jpmorgan-chase-co/summary?id=D000000103" } },
+    "fines": [
+      { "description": "Numerous regulatory settlements (e.g., market-conduct, mortgage, and trading matters such as the 2012 'London Whale').", "amount": "tens of billions cumulatively since 2008", "agency": "DOJ, SEC, CFTC and others", "source": { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/parent/jpmorgan-chase" } }
+    ],
+    "labor": [
+      { "description": "Largely non-unionized U.S. workforce; periodic disputes over branch staffing and pay.", "year": "ongoing", "source": { "name": "NLRB case search", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "Largest U.S. bank by total assets.", "source": { "name": "Federal Reserve / FDIC data", "url": "https://www.federalreserve.gov/releases/lbr/current/default.htm" } },
+    "competitors": ["Bank of America", "Citigroup", "Wells Fargo", "Goldman Sachs"],
+    "timeline": [
+      { "date": "2000", "event": "J.P. Morgan & Co. merges with Chase Manhattan.", "source": { "name": "SEC filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617" } },
+      { "date": "2008", "event": "Acquires Bear Stearns and Washington Mutual assets during the financial crisis.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000019617&type=8-K" } }
+    ]
+  },
+  {
+    "id": "berkshire",
+    "name": "Berkshire Hathaway Inc.",
+    "ticker": "NYSE: BRK.A / BRK.B",
+    "sector": "Conglomerate / Insurance",
+    "headquarters": "Omaha, Nebraska, USA",
+    "summary": "A diversified holding company controlled by Warren Buffett, owning insurance (GEICO), railroads (BNSF), energy, and large equity stakes in public companies.",
+    "shareholders": [
+      { "holder": "Warren Buffett", "stake": "~14–15% of equity, ~30%+ of voting power via Class A shares", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } },
+      { "holder": "The Vanguard Group", "stake": "~10% of Class B", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } },
+      { "holder": "BlackRock", "stake": "~6% of Class B", "source": { "name": "SEC 13F / company filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } }
+    ],
+    "ceoPay": { "name": "Warren Buffett", "amount": "$100,000 base salary (notably low; most wealth is from share ownership)", "year": "2023", "source": { "name": "SEC DEF 14A Proxy Statement", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } },
+    "medianPay": { "amount": "Disclosed in proxy (varies across operating subsidiaries)", "year": "2023", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } },
+    "payRatio": { "value": "Low at the CEO level due to $100k salary", "source": { "name": "SEC pay-ratio disclosure", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=DEF+14A" } },
+    "lobbying": { "amount": "Lobbying reported by subsidiaries (e.g., BNSF, Berkshire Hathaway Energy)", "year": "recent annual", "source": { "name": "OpenSecrets — Berkshire Hathaway", "url": "https://www.opensecrets.org/orgs/berkshire-hathaway/summary?id=D000021868" } },
+    "politicalSpending": { "amount": "PAC and individual contributions (see FEC)", "cycle": "per election cycle", "source": { "name": "OpenSecrets — Berkshire Hathaway", "url": "https://www.opensecrets.org/orgs/berkshire-hathaway/summary?id=D000021868" } },
+    "fines": [
+      { "description": "Penalties primarily at the subsidiary level (e.g., utility and rail safety/environmental matters).", "amount": "varies by subsidiary", "agency": "Multiple", "source": { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/parent/berkshire-hathaway" } }
+    ],
+    "labor": [
+      { "description": "Subsidiaries include heavily unionized operations such as BNSF Railway.", "year": "ongoing", "source": { "name": "NLRB / Surface Transportation Board", "url": "https://www.nlrb.gov/search/case" } }
+    ],
+    "marketShare": { "description": "One of the largest companies in the world by market capitalization; large insurance float.", "source": { "name": "Company 10-K", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=10-K" } },
+    "competitors": ["Other insurers (e.g., Progressive, Allstate)", "Other conglomerates"],
+    "timeline": [
+      { "date": "1965", "event": "Warren Buffett takes control of Berkshire Hathaway, then a textile firm.", "source": { "name": "Berkshire shareholder letters", "url": "https://www.berkshirehathaway.com/letters/letters.html" } },
+      { "date": "2010", "event": "Completes acquisition of BNSF Railway.", "source": { "name": "SEC 8-K filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=8-K" } }
+    ]
+  }
+]

@@ -1,0 +1,87 @@
+{
+  "stats": [
+    {
+      "label": "Billionaires worldwide",
+      "value": "~2,700+",
+      "context": "Number of billionaires tracked globally (figure varies by list and year).",
+      "source": { "name": "Forbes World's Billionaires List", "url": "https://www.forbes.com/billionaires/" }
+    },
+    {
+      "label": "Combined billionaire wealth",
+      "value": "~$14+ trillion",
+      "context": "Approximate aggregate net worth of the world's billionaires.",
+      "source": { "name": "Forbes World's Billionaires List", "url": "https://www.forbes.com/billionaires/" }
+    },
+    {
+      "label": "Top S&P 500 CEO-to-worker pay ratio",
+      "value": "Often 300:1 and higher",
+      "context": "CEO compensation compared to median worker pay at large U.S. firms.",
+      "source": { "name": "AFL-CIO Executive Paywatch", "url": "https://aflcio.org/paywatch" }
+    },
+    {
+      "label": "Annual U.S. federal lobbying spend",
+      "value": "~$4+ billion / year",
+      "context": "Total reported federal lobbying expenditures in the United States.",
+      "source": { "name": "OpenSecrets — Lobbying Database", "url": "https://www.opensecrets.org/federal-lobbying" }
+    }
+  ],
+  "cards": [
+    {
+      "id": "grocery-owners",
+      "category": "Ownership",
+      "title": "Who owns the largest shares of major grocery chains?",
+      "body": "Large index-fund managers — Vanguard, BlackRock, and State Street — are among the top institutional shareholders of most publicly traded U.S. grocery and retail chains, often alongside founding families (e.g., the Walton family at Walmart). The same handful of asset managers appear across competing companies.",
+      "sources": [
+        { "name": "SEC DEF 14A proxy statements (per company)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany" },
+        { "name": "SEC 13F institutional holdings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=13F" }
+      ]
+    },
+    {
+      "id": "ceo-vs-worker",
+      "category": "Compensation",
+      "title": "How does CEO pay compare to worker pay?",
+      "body": "Public companies must disclose the ratio of CEO compensation to median employee pay in their annual proxy statements (a rule in effect since 2018). At many large retailers and food-service firms the ratio runs into the hundreds — and sometimes near or above 1,000:1.",
+      "sources": [
+        { "name": "SEC pay-ratio rule disclosures (DEF 14A)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=DEF+14A" },
+        { "name": "AFL-CIO Executive Paywatch", "url": "https://aflcio.org/paywatch" }
+      ]
+    },
+    {
+      "id": "lobbying-industries",
+      "category": "Influence",
+      "title": "Which industries spend the most on lobbying?",
+      "body": "Year after year, the biggest reported federal lobbying spenders tend to come from pharmaceuticals/health products, electronics & technology, insurance, and oil & gas. OpenSecrets compiles the disclosures that lobbyists are legally required to file.",
+      "sources": [
+        { "name": "OpenSecrets — Lobbying by industry", "url": "https://www.opensecrets.org/federal-lobbying/industries" }
+      ]
+    },
+    {
+      "id": "airline-owners",
+      "category": "Ownership",
+      "title": "What are the largest shareholders of major airlines?",
+      "body": "The major U.S. airlines (Delta, United, American, Southwest) are predominantly held by the same large institutional asset managers — Vanguard, BlackRock, and State Street — a pattern economists call 'common ownership' across competitors in the same industry.",
+      "sources": [
+        { "name": "SEC 13F filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=13F" },
+        { "name": "SEC DEF 14A proxy statements", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=DEF+14A" }
+      ]
+    },
+    {
+      "id": "index-fund-power",
+      "category": "Ownership",
+      "title": "Three firms, many boardrooms",
+      "body": "Vanguard, BlackRock, and State Street collectively manage trillions of dollars and rank among the largest shareholders of a majority of S&P 500 companies. Because index funds hold the whole market, these managers cast votes at thousands of shareholder meetings each year.",
+      "sources": [
+        { "name": "SEC 13F filings", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=13F" }
+      ]
+    },
+    {
+      "id": "corporate-fines",
+      "category": "Accountability",
+      "title": "Tracking corporate penalties",
+      "body": "Good Jobs First's Violation Tracker aggregates regulatory penalties and settlements (environmental, employment, financial, consumer protection, and more) from U.S. federal and state agencies, letting anyone total up a parent company's record over time.",
+      "sources": [
+        { "name": "Violation Tracker (Good Jobs First)", "url": "https://violationtracker.goodjobsfirst.org/" }
+      ]
+    }
+  ]
+}
